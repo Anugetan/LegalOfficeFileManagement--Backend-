@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.anuge.wallet.dto.LoginRequest;
-import com.anuge.wallet.entity.LoginEntity;
+import com.anuge.wallet.entity.UsersEntity;
 import com.anuge.wallet.repository.LoginRepository;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -34,10 +34,7 @@ public class LoginController {
             new HttpSessionSecurityContextRepository();
 
 
-    public LoginController(
-            AuthenticationManager authenticationManager,
-            LoginRepository loginRepository) {
-
+    public LoginController(AuthenticationManager authenticationManager,LoginRepository loginRepository) {
         this.authenticationManager = authenticationManager;
         this.loginRepository = loginRepository;
     }
@@ -55,62 +52,50 @@ public class LoginController {
                             request.getPassword()
                     );
 
-
-            Authentication authentication =
-                    authenticationManager.authenticate(token);
-
-
+            Authentication authentication = authenticationManager.authenticate(token);
             
             SecurityContext context = SecurityContextHolder.createEmptyContext(); // Create SecurityContext
-
             context.setAuthentication(authentication);
-
-            SecurityContextHolder.setContext(context);
-
-
             
+            SecurityContextHolder.setContext(context);
+         
             securityContextRepository.saveContext( context, httpRequest, null );// Save authentication into HTTP session
-
 
             return ResponseEntity.ok("Login Successful");
 
+//        } catch (Exception e) {
+//
+//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");
+//        }
         } catch (Exception e) {
+
+            e.printStackTrace();
 
             return ResponseEntity
                     .status(HttpStatus.UNAUTHORIZED)
-                    .body("Invalid username or password");
+                    .body(e.getMessage());
         }
     }
 
     @GetMapping("/me")
     public ResponseEntity<?> getCurrentUser(
-            Authentication authentication) {
+    		Authentication authentication) {
 
-        if (authentication == null ||
-                !authentication.isAuthenticated()) {
+        if (authentication == null ||!authentication.isAuthenticated()) {
 
-            return ResponseEntity
-                    .status(HttpStatus.UNAUTHORIZED)
-                    .body("Not authenticated");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Not authenticated");
         }
 
-
-        String username =
-                authentication.getName();
-
-
-        LoginEntity user =
-                loginRepository
-                        .findByUsername(username)
-                        .orElseThrow();
-
+        String username = authentication.getName();
+        UsersEntity user = loginRepository.findByUsername(username).orElseThrow();
 
         return ResponseEntity.ok(
-                Map.of(
+        		Map.of
+        	         (
                         "username", user.getUsername(),
                         "name", user.getName(),
                         "lastname", user.getLastname()
-                )
+                     )
         );
     }
 
@@ -121,15 +106,11 @@ public class LoginController {
 
         SecurityContextHolder.clearContext();
 
-
         if (request.getSession(false) != null) {
 
             request.getSession(false).invalidate();
         }
 
-
-        return ResponseEntity.ok(
-                "Logout Successful"
-        );
+        return ResponseEntity.ok("Logout Successful");
     }
 }

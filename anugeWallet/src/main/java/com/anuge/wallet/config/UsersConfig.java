@@ -14,8 +14,7 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity
-public class LoginConfig {
-
+public class UsersConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -24,7 +23,6 @@ public class LoginConfig {
         // Your current database stores plain passwords.
         return NoOpPasswordEncoder.getInstance();
     }
-
 
     @Bean
     public DaoAuthenticationProvider authenticationProvider(
@@ -38,10 +36,8 @@ public class LoginConfig {
         provider.setPasswordEncoder(
                 passwordEncoder()
         );
-
         return provider;
     }
-
 
     @Bean
     public AuthenticationManager authenticationManager(
@@ -63,13 +59,13 @@ public class LoginConfig {
 
             .authorizeHttpRequests(auth -> auth
 
-                .requestMatchers( "/api/loginAuth/login").permitAll()
+                .requestMatchers("/api/loginAuth/login").permitAll()
                 .requestMatchers("/api/loginAuth/logout").permitAll()
+                .requestMatchers("/api/registerAuth/register").permitAll()
                 .anyRequest().authenticated()
             )
 
             .httpBasic(httpBasic -> httpBasic.disable());
-
 
         return http.build();
     }

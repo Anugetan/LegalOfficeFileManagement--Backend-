@@ -3,7 +3,7 @@ package com.anuge.wallet.service;
 import org.springframework.stereotype.Service;
 
 import com.anuge.wallet.dto.LoginRequest;
-import com.anuge.wallet.entity.LoginEntity;
+import com.anuge.wallet.entity.UsersEntity;
 import com.anuge.wallet.repository.LoginRepository;
 
 @Service
@@ -17,10 +17,7 @@ public class LoginAuth {
 
     public String login(LoginRequest request) {
 
-        LoginEntity user =
-                loginRepository
-                    .findByUsername(request.getUsername())
-                    .orElse(null);
+        UsersEntity user = loginRepository.findByUsername(request.getUsername()).orElse(null);
 
         if (user == null) {
             return "User name not found";

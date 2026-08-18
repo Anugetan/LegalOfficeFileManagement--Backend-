@@ -5,7 +5,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import com.anuge.wallet.entity.LoginEntity;
+import com.anuge.wallet.entity.UsersEntity;
 import com.anuge.wallet.repository.LoginRepository;
 
 @Service
@@ -25,7 +25,7 @@ public class CustomUserDetailsService
     public UserDetails loadUserByUsername(String username)
             throws UsernameNotFoundException {
 
-        LoginEntity user =  loginRepository.findByUsername(username).orElseThrow(() ->
+        UsersEntity user =  loginRepository.findByUsername(username).orElseThrow(() ->
                                 new UsernameNotFoundException(
                                         "User not found"
                                 )

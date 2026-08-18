@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 
 @Entity
 @Table(name = "users")
-public class LoginEntity { //represent users table
+public class UsersEntity { //represent users table
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY) //increment id 
@@ -16,6 +16,11 @@ public class LoginEntity { //represent users table
 	private String phonenumber;
 	private String email;
 	
+
+  
+    public UsersEntity() {   // REQUIRED BY JPA
+    }
+
 	
 	//JPA create object of LoginEntity
 	public int getId() {
@@ -61,7 +66,20 @@ public class LoginEntity { //represent users table
 		this.email = email;
 	}
 	
-	
-	
+	public UsersEntity(
+	        String username,
+	        String password,
+	        String name,
+	        String lastname,
+	        String phonenumber,
+	        String email) {
+
+	    this.username = username;
+	    this.password = password;
+	    this.name = name;
+	    this.lastname = lastname;
+	    this.phonenumber = phonenumber;
+	    this.email = email;
+	}
 
 }
