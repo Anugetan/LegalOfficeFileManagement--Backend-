@@ -8,7 +8,7 @@ public class UsersEntity { //represent users table
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY) //increment id 
-	private int id;
+	private Long id;
 	private String username;
 	private String password;
 	private String name;
@@ -23,10 +23,10 @@ public class UsersEntity { //represent users table
 
 	
 	//JPA create object of LoginEntity
-	public int getId() {
+	public Long getId() {
 		return id;
 	}
-	public void setId(int id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
 	public String getUsername() {
