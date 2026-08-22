@@ -9,18 +9,21 @@ public class UsersEntity { //represent users table
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY) //increment id 
 	private Long id;
+	
+	@Column(unique = true)
 	private String username;
+	
 	private String password;
 	private String name;
 	private String lastname;
 	private String phonenumber;
+	
+	@Column(unique = true)
 	private String email;
 	
 
-  
     public UsersEntity() {   // REQUIRED BY JPA
     }
-
 	
 	//JPA create object of LoginEntity
 	public Long getId() {

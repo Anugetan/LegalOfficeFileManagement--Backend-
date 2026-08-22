@@ -19,8 +19,6 @@ public class UsersConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
 
-        // DEVELOPMENT ONLY
-        // Your current database stores plain passwords.
         return NoOpPasswordEncoder.getInstance();
     }
 
@@ -58,7 +56,6 @@ public class UsersConfig {
             .cors(cors -> {})
 
             .authorizeHttpRequests(auth -> auth
-
                 .requestMatchers("/api/loginAuth/login").permitAll()
                 .requestMatchers("/api/loginAuth/logout").permitAll()
                 .requestMatchers("/api/registerAuth/register").permitAll()

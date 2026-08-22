@@ -107,7 +107,6 @@ public class LoginController {
         SecurityContextHolder.clearContext();
 
         if (request.getSession(false) != null) {
-
             request.getSession(false).invalidate();
         }
 

@@ -44,6 +44,7 @@ public class RegisterAuth {
                         request.getEmail()
                     )
                 );
+		
 		// CREATE WALLET
 		walletAccountService.createWallet(user.getId());
 		
