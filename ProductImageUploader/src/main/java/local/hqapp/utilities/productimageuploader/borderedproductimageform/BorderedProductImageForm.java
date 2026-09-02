@@ -17,151 +17,121 @@ import com.google.zxing.WriterException;
 import com.google.zxing.client.j2se.MatrixToImageWriter;
 import com.google.zxing.common.BitMatrix;
 
-import deals.weshop.utilities.imagedatafiller.FillupField;
-import deals.weshop.utilities.imagedatafiller.FillupForm;
 import local.hqapp.utilities.productimageuploader.datasource.BorderedImageProductDescription;
 
-public class BorderedProductImageForm extends FillupForm {
+public class BorderedProductImageForm {
 
-    public static final String PRODUCT_DESCRIPTIONS =
-            "ProductDescriptions";
-
-    public static final String QR_CODE =
-            "QrCode";
+    public static final String PRODUCT_DESCRIPTIONS = "ProductDescriptions";
+    public static final String QR_CODE = "QrCode";
 
     private Color fontColor;
-
     private Font defaultFont;
 
     private int imageActualWidth;
-
     private int imageActualHeight;
 
     private int borderTopHeight;
-
     private int borderLeftWidth;
 
     private int additionalTopBorderHeight;
-
     private int additionalBottomBorderHeight;
-
     private int additionalBorderWidth;
 
     private int barcodeFontSize = 14;
 
     private String productCode;
 
-    private List<BorderedImageProductDescription>
-            productDescriptions;
+    private List<BorderedImageProductDescription> productDescriptions;
 
     private Image borderedImage;
 
-
     // =========================================================
-    // QR CODE SIZE
+    // QR SIZE
     // =========================================================
 
     private int qrWidth = 180;
-
     private int qrHeight = 180;
-
 
     // =========================================================
     // BARCODE SIZE
     // =========================================================
 
     private int barcodeWidth;
-
     private int barcodeHeight;
 
-
     // =========================================================
-    // TEXT SIZE
+    // FONT / DETAILS
     // =========================================================
 
     private int additionalFontSize;
-
     private int additionalMarginBottom;
 
-
     // =========================================================
-    // CONSTANTS
+    // QR CONSTANTS
     // =========================================================
 
     private static final double QR_MARGIN_INCHES = 0.5;
-
     private static final int DEFAULT_DPI = 96;
 
     private static final int QR_MARGIN =
-            (int) Math.round(
-                    QR_MARGIN_INCHES * DEFAULT_DPI
-            );
+            (int) Math.round(QR_MARGIN_INCHES * DEFAULT_DPI);
 
     private static final double QR_SIZE_PERCENT = 0.22;
 
+    // =========================================================
+    // BARCODE / FONT PERCENTAGES
+    // =========================================================
+
     private static final double BARCODE_WIDTH_PERCENT = 0.55;
-
     private static final double BARCODE_HEIGHT_PERCENT = 0.12;
-
     private static final double DETAILS_FONT_PERCENT = 0.035;
 
+    // =========================================================
+    // BACKGROUND
+    // =========================================================
+
     private static final double QR_BACKGROUND_PADDING_PERCENT = 0.04;
-
     private static final double BARCODE_BACKGROUND_PADDING_PERCENT = 0.04;
-
     private static final double DETAILS_BACKGROUND_PADDING_PERCENT = 0.04;
 
     private static final int MIN_BACKGROUND_PADDING = 4;
 
     private static final int QR_BACKGROUND_ALPHA = 255;
-
     private static final int BARCODE_BACKGROUND_ALPHA = 255;
-
     private static final int DETAILS_BACKGROUND_ALPHA = 255;
 
-    private static final int QR_OFFSET_X = 0;
-
-    private static final int QR_OFFSET_Y = -60;
-
-    private static final int BARCODE_OFFSET_X = 0;
-
-    private static final int BARCODE_OFFSET_Y = -200;
-
-    /*
-     * IMPORTANT:
-     *
-     * Positive value moves the details DOWN
-     * below the barcode.
-     */
     private static final int DETAILS_GAP_BELOW_BARCODE = 30;
-
-    private static final int DETAILS_OFFSET_X = 0;
-
-    private static final int DETAILS_OFFSET_Y = 0;
 
     private static final int CARD_CORNER_RADIUS = 24;
 
-
     // =========================================================
-    // LIMITS
+    // SIZE LIMITS
     // =========================================================
 
-    private static final int MIN_QR_SIZE = 50;
-
+    private static final int MIN_QR_SIZE = 10;
     private static final int MAX_QR_SIZE = 1000;
 
-    private static final int MIN_BARCODE_WIDTH = 120;
-
+    private static final int MIN_BARCODE_WIDTH = 10;
     private static final int MAX_BARCODE_WIDTH = 1500;
 
-    private static final int MIN_BARCODE_HEIGHT = 40;
-
+    private static final int MIN_BARCODE_HEIGHT = 10;
     private static final int MAX_BARCODE_HEIGHT = 400;
 
-    private static final int MIN_DETAILS_FONT_SIZE = 8;
-
+    private static final int MIN_DETAILS_FONT_SIZE = 3;
     private static final int MAX_DETAILS_FONT_SIZE = 200;
 
+    // =========================================================
+    // POSITION
+    // =========================================================
+
+    private int qrPositionX = 0;
+    private int qrPositionY = -60;
+
+    private int barcodePositionX = 0;
+    private int barcodePositionY = -200;
+
+    private int detailsPositionX = 0;
+    private int detailsPositionY = 0;
 
     // =========================================================
     // CONSTRUCTOR
@@ -173,28 +143,16 @@ public class BorderedProductImageForm extends FillupForm {
             int borderLeftWidth,
             int borderTopHeight) {
 
-        this.imageActualWidth =
-                imageActualWidth;
+        this.imageActualWidth = imageActualWidth;
+        this.imageActualHeight = imageActualHeight;
 
-        this.imageActualHeight =
-                imageActualHeight;
-
-        this.borderTopHeight =
-                borderTopHeight;
-
-        this.borderLeftWidth =
-                borderLeftWidth;
-
-
-        // -----------------------------------------------------
-        // INITIAL BARCODE SIZE
-        // -----------------------------------------------------
+        this.borderTopHeight = borderTopHeight;
+        this.borderLeftWidth = borderLeftWidth;
 
         this.barcodeWidth =
                 clamp(
                         (int) Math.round(
-                                imageActualWidth
-                                * BARCODE_WIDTH_PERCENT
+                                imageActualWidth * BARCODE_WIDTH_PERCENT
                         ),
                         MIN_BARCODE_WIDTH,
                         MAX_BARCODE_WIDTH
@@ -203,8 +161,7 @@ public class BorderedProductImageForm extends FillupForm {
         this.barcodeHeight =
                 clamp(
                         (int) Math.round(
-                                imageActualHeight
-                                * BARCODE_HEIGHT_PERCENT
+                                imageActualHeight * BARCODE_HEIGHT_PERCENT
                         ),
                         MIN_BARCODE_HEIGHT,
                         MAX_BARCODE_HEIGHT
@@ -213,15 +170,13 @@ public class BorderedProductImageForm extends FillupForm {
         initializeProductImageForm();
     }
 
-
     // =========================================================
-    // INITIALIZE
+    // INITIALIZATION
     // =========================================================
 
     private void initializeProductImageForm() {
 
-        fontColor =
-                Color.BLACK;
+        fontColor = Color.BLACK;
 
         defaultFont =
                 new Font(
@@ -229,31 +184,12 @@ public class BorderedProductImageForm extends FillupForm {
                         Font.BOLD,
                         24
                 );
-
-        addFillupField(
-                createProductDescriptionField()
-        );
     }
-
-
-    private FillupField createProductDescriptionField() {
-
-        FillupField field =
-                new FillupField();
-
-        field.setName(
-                PRODUCT_DESCRIPTIONS
-        );
-
-        return field;
-    }
-
 
     // =========================================================
     // CREATE IMAGE
     // =========================================================
 
-    @Override
     public Image createImage() {
 
         if (borderedImage == null) {
@@ -265,6 +201,10 @@ public class BorderedProductImageForm extends FillupForm {
 
         int canvasHeight =
                 borderedImage.getHeight(null);
+
+        if (canvasWidth <= 0 || canvasHeight <= 0) {
+            return null;
+        }
 
         BufferedImage output =
                 new BufferedImage(
@@ -291,11 +231,6 @@ public class BorderedProductImageForm extends FillupForm {
                 RenderingHints.VALUE_RENDER_QUALITY
         );
 
-
-        // -----------------------------------------------------
-        // ORIGINAL BORDERED IMAGE
-        // -----------------------------------------------------
-
         g.drawImage(
                 borderedImage,
                 0,
@@ -303,10 +238,9 @@ public class BorderedProductImageForm extends FillupForm {
                 null
         );
 
-
-        // -----------------------------------------------------
+        // =====================================================
         // PRODUCT IMAGE POSITION
-        // -----------------------------------------------------
+        // =====================================================
 
         int productImageX =
                 borderLeftWidth
@@ -326,28 +260,15 @@ public class BorderedProductImageForm extends FillupForm {
                 productImageX
                 + productImageWidth;
 
-
-        // -----------------------------------------------------
+        // =====================================================
         // BARCODE
-        // -----------------------------------------------------
+        // =====================================================
 
         String firstBarcode =
                 getFirstBarcode();
 
         BufferedImage barcodeImage =
-                createBarcodeImage(
-                        firstBarcode
-                );
-
-        int barcodeImageHeight =
-                barcodeImage != null
-                        ? barcodeImage.getHeight()
-                        : 0;
-
-
-        // -----------------------------------------------------
-        // DETAILS
-        // -----------------------------------------------------
+                createBarcodeImage(firstBarcode);
 
         int detailsWidth =
                 getDetailsWidth();
@@ -355,10 +276,9 @@ public class BorderedProductImageForm extends FillupForm {
         int detailsHeight =
                 getDetailsHeight();
 
-
-        // -----------------------------------------------------
-        // QR CODE
-        // -----------------------------------------------------
+        // =====================================================
+        // QR
+        // =====================================================
 
         drawQrCard(
                 g,
@@ -369,30 +289,26 @@ public class BorderedProductImageForm extends FillupForm {
                 productImageHeight
         );
 
-
-        // -----------------------------------------------------
+        // =====================================================
         // BARCODE
-        // -----------------------------------------------------
+        // =====================================================
 
         if (barcodeImage != null) {
 
             int barcodeX =
                     productImageX
                     + (
-                            productImageWidth
-                            - barcodeImage.getWidth()
+                        productImageWidth
+                        - barcodeImage.getWidth()
                     ) / 2
-                    + BARCODE_OFFSET_X;
+                    + barcodePositionX;
 
             int barcodeY =
                     productImageY
                     + (
-                            productImageHeight
-                            * 3
-                            / 5
+                        productImageHeight * 3 / 5
                     )
-                    + BARCODE_OFFSET_Y;
-
+                    + barcodePositionY;
 
             int barcodePadding =
                     getDynamicPadding(
@@ -401,14 +317,11 @@ public class BorderedProductImageForm extends FillupForm {
                             BARCODE_BACKGROUND_PADDING_PERCENT
                     );
 
-
             int barcodeBackgroundX =
-                    barcodeX
-                    - barcodePadding;
+                    barcodeX - barcodePadding;
 
             int barcodeBackgroundY =
-                    barcodeY
-                    - barcodePadding;
+                    barcodeY - barcodePadding;
 
             int barcodeBackgroundWidth =
                     barcodeImage.getWidth()
@@ -417,7 +330,6 @@ public class BorderedProductImageForm extends FillupForm {
             int barcodeBackgroundHeight =
                     barcodeImage.getHeight()
                     + (barcodePadding * 2);
-
 
             drawWhiteBackground(
                     g,
@@ -428,7 +340,6 @@ public class BorderedProductImageForm extends FillupForm {
                     BARCODE_BACKGROUND_ALPHA
             );
 
-
             g.drawImage(
                     barcodeImage,
                     barcodeX,
@@ -436,108 +347,76 @@ public class BorderedProductImageForm extends FillupForm {
                     null
             );
 
-
-            // -------------------------------------------------
+            // =================================================
             // DETAILS
-            //
-            // IMPORTANT:
-            //
-            // Details now start BELOW the complete barcode
-            // image + barcode padding + additional gap.
-            // -------------------------------------------------
+            // =================================================
 
-            if (
-                    detailsWidth > 0
-                    && detailsHeight > 0
-            ) {
+            if (detailsWidth > 0 && detailsHeight > 0) {
 
-            	int detailsPadding =
-            	        getDynamicPadding(
-            	                detailsWidth,
-            	                detailsHeight,
-            	                DETAILS_BACKGROUND_PADDING_PERCENT
-            	        );
+                int detailsPadding =
+                        getDynamicPadding(
+                                detailsWidth,
+                                detailsHeight,
+                                DETAILS_BACKGROUND_PADDING_PERCENT
+                        );
 
-            	int detailsBackgroundWidth =
-            	        detailsWidth
-            	        + (detailsPadding * 2);
+                int detailsBackgroundWidth =
+                        detailsWidth
+                        + (detailsPadding * 2);
 
-            	int detailsBackgroundHeight =
-            	        detailsHeight
-            	        + (detailsPadding * 2);
+                int detailsBackgroundHeight =
+                        detailsHeight
+                        + (detailsPadding * 2);
 
-            	int detailsBackgroundX =
-            	        productImageX
-            	        + (
-            	                productImageWidth
-            	                - detailsBackgroundWidth
-            	        ) / 2
-            	        + DETAILS_OFFSET_X;
+                int detailsBackgroundX =
+                        productImageX
+                        + (
+                            productImageWidth
+                            - detailsBackgroundWidth
+                        ) / 2
+                        + detailsPositionX;
 
-            	int detailsBackgroundY =
-            	        barcodeBackgroundY
-            	        + barcodeBackgroundHeight
-            	        + DETAILS_GAP_BELOW_BARCODE
-            	        + DETAILS_OFFSET_Y;
+                int detailsBackgroundY =
+                        barcodeBackgroundY
+                        + barcodeBackgroundHeight
+                        + DETAILS_GAP_BELOW_BARCODE
+                        + detailsPositionY;
 
+                int detailsX =
+                        detailsBackgroundX
+                        + detailsPadding;
 
-            	// -------------------------------------------------
-            	// DETAILS X POSITION
-            	// -------------------------------------------------
+                Font detailsFont =
+                        defaultFont.deriveFont(
+                                (float) getDetailsFontSize()
+                        );
 
-            	int detailsX =
-            	        detailsBackgroundX
-            	        + detailsPadding;
+                FontMetrics detailsMetrics =
+                        g.getFontMetrics(detailsFont);
 
+                int detailsY =
+                        detailsBackgroundY
+                        + (
+                            detailsBackgroundHeight
+                            - detailsHeight
+                        ) / 2
+                        + detailsMetrics.getAscent();
 
-            	// -------------------------------------------------
-            	// CENTER DETAILS VERTICALLY
-            	// -------------------------------------------------
+                drawWhiteBackground(
+                        g,
+                        detailsBackgroundX,
+                        detailsBackgroundY,
+                        detailsBackgroundWidth,
+                        detailsBackgroundHeight,
+                        DETAILS_BACKGROUND_ALPHA
+                );
 
-            	int detailsContentHeight =
-            	        getDetailsHeight();
-
-            	Font detailsFont =
-            	        defaultFont.deriveFont(
-            	                (float) getDetailsFontSize()
-            	        );
-
-            	FontMetrics detailsMetrics =
-            	        g.getFontMetrics(detailsFont);
-
-            	int detailsY =
-            	        detailsBackgroundY
-            	        + (
-            	                detailsBackgroundHeight
-            	                - detailsContentHeight
-            	        ) / 2
-            	        + detailsMetrics.getAscent();
-
-
-            	// -------------------------------------------------
-            	// DRAW WHITE BACKGROUND
-            	// -------------------------------------------------
-
-            	drawWhiteBackground(
-            	        g,
-            	        detailsBackgroundX,
-            	        detailsBackgroundY,
-            	        detailsBackgroundWidth,
-            	        detailsBackgroundHeight,
-            	        DETAILS_BACKGROUND_ALPHA
-            	);
-
-
-            	// -------------------------------------------------
-            	// DRAW DETAILS
-            	// -------------------------------------------------
-
-            	drawProductDescriptions(
-            	        g,
-            	        detailsY,
-            	        detailsX,
-            	        detailsWidth
-            	);
+                drawProductDescriptions(
+                        g,
+                        detailsY,
+                        detailsX,
+                        detailsWidth
+                );
             }
         }
 
@@ -545,7 +424,6 @@ public class BorderedProductImageForm extends FillupForm {
 
         return output;
     }
-
 
     // =========================================================
     // QR CARD
@@ -566,16 +444,8 @@ public class BorderedProductImageForm extends FillupForm {
             return;
         }
 
-
-        /*
-         * IMPORTANT:
-         *
-         * Use the CURRENT edited QR size.
-         */
-
         int qrSize =
                 getCurrentQrSize();
-
 
         int qrPadding =
                 getDynamicPadding(
@@ -583,7 +453,6 @@ public class BorderedProductImageForm extends FillupForm {
                         qrSize,
                         QR_BACKGROUND_PADDING_PERCENT
                 );
-
 
         int qrBackgroundWidth =
                 qrSize
@@ -593,19 +462,16 @@ public class BorderedProductImageForm extends FillupForm {
                 qrSize
                 + (qrPadding * 2);
 
-
         int qrBackgroundX =
                 productRight
                 - qrBackgroundWidth
                 - QR_MARGIN
-                + QR_OFFSET_X;
-
+                + qrPositionX;
 
         int qrBackgroundY =
                 productImageY
                 + QR_MARGIN
-                + QR_OFFSET_Y;
-
+                + qrPositionY;
 
         drawWhiteBackground(
                 g,
@@ -616,7 +482,6 @@ public class BorderedProductImageForm extends FillupForm {
                 QR_BACKGROUND_ALPHA
         );
 
-
         int qrX =
                 qrBackgroundX
                 + qrPadding;
@@ -624,7 +489,6 @@ public class BorderedProductImageForm extends FillupForm {
         int qrY =
                 qrBackgroundY
                 + qrPadding;
-
 
         drawQrCode(
                 g,
@@ -634,9 +498,8 @@ public class BorderedProductImageForm extends FillupForm {
         );
     }
 
-
     // =========================================================
-    // CURRENT QR SIZE
+    // QR SIZE
     // =========================================================
 
     private int getCurrentQrSize() {
@@ -648,32 +511,45 @@ public class BorderedProductImageForm extends FillupForm {
         );
     }
 
+    /**
+     * Absolute QR size.
+     */
+    public void setQrSize(int size) {
 
-    // =========================================================
-    // DEFAULT QR SIZE
-    // =========================================================
-
-    private int getDefaultQrSize() {
-
-        int baseImageSize =
-                Math.min(
-                        imageActualWidth,
-                        imageActualHeight
+        int newSize =
+                clamp(
+                        size,
+                        MIN_QR_SIZE,
+                        MAX_QR_SIZE
                 );
 
-        int size =
-                (int) Math.round(
-                        baseImageSize
-                        * QR_SIZE_PERCENT
-                );
-
-        return clamp(
-                size,
-                MIN_QR_SIZE,
-                MAX_QR_SIZE
-        );
+        this.qrWidth = newSize;
+        this.qrHeight = newSize;
     }
 
+    /**
+     * Cumulative QR size adjustment.
+     *
+     * Example:
+     * +3 -> 183
+     * +2 -> 185
+     * -3 -> 182
+     */
+    public void adjustQrSize(int adjustment) {
+
+        int newSize =
+                qrWidth + adjustment;
+
+        newSize =
+                clamp(
+                        newSize,
+                        MIN_QR_SIZE,
+                        MAX_QR_SIZE
+                );
+
+        this.qrWidth = newSize;
+        this.qrHeight = newSize;
+    }
 
     // =========================================================
     // DYNAMIC PADDING
@@ -697,7 +573,6 @@ public class BorderedProductImageForm extends FillupForm {
                 )
         );
     }
-
 
     // =========================================================
     // WHITE BACKGROUND
@@ -723,7 +598,6 @@ public class BorderedProductImageForm extends FillupForm {
                         )
                 );
 
-
         g.setComposite(
                 AlphaComposite.getInstance(
                         AlphaComposite.SRC_OVER,
@@ -731,11 +605,7 @@ public class BorderedProductImageForm extends FillupForm {
                 )
         );
 
-
-        g.setColor(
-                Color.WHITE
-        );
-
+        g.setColor(Color.WHITE);
 
         g.fillRoundRect(
                 x,
@@ -746,13 +616,11 @@ public class BorderedProductImageForm extends FillupForm {
                 CARD_CORNER_RADIUS
         );
 
-
         state.restore();
     }
 
-
     // =========================================================
-    // DRAW QR
+    // QR CODE
     // =========================================================
 
     private void drawQrCode(
@@ -768,7 +636,6 @@ public class BorderedProductImageForm extends FillupForm {
             return;
         }
 
-
         try {
 
             BitMatrix matrix =
@@ -779,12 +646,10 @@ public class BorderedProductImageForm extends FillupForm {
                             size
                     );
 
-
             BufferedImage qrImage =
                     MatrixToImageWriter.toBufferedImage(
                             matrix
                     );
-
 
             g.drawImage(
                     qrImage,
@@ -801,9 +666,8 @@ public class BorderedProductImageForm extends FillupForm {
         }
     }
 
-
     // =========================================================
-    // CREATE BARCODE
+    // BARCODE IMAGE
     // =========================================================
 
     private BufferedImage createBarcodeImage(
@@ -816,12 +680,7 @@ public class BorderedProductImageForm extends FillupForm {
             return null;
         }
 
-
         try {
-
-            /*
-             * Use CURRENT barcode dimensions.
-             */
 
             int actualBarcodeWidth =
                     clamp(
@@ -830,18 +689,12 @@ public class BorderedProductImageForm extends FillupForm {
                             MAX_BARCODE_WIDTH
                     );
 
-
             int actualBarcodeHeight =
                     clamp(
                             barcodeHeight,
                             MIN_BARCODE_HEIGHT,
                             MAX_BARCODE_HEIGHT
                     );
-
-
-            // -------------------------------------------------
-            // GENERATE BARCODE
-            // -------------------------------------------------
 
             BitMatrix matrix =
                     new MultiFormatWriter().encode(
@@ -851,26 +704,18 @@ public class BorderedProductImageForm extends FillupForm {
                             actualBarcodeHeight
                     );
 
-
             BufferedImage barcodeOnly =
                     MatrixToImageWriter.toBufferedImage(
                             matrix
                     );
 
-
-            // -------------------------------------------------
-            // BARCODE TEXT HEIGHT
-            // -------------------------------------------------
-
             int scaledBarcodeFontSize =
                     getBarcodeFontSizeForImage();
-
 
             int finalHeight =
                     actualBarcodeHeight
                     + scaledBarcodeFontSize
                     + 15;
-
 
             BufferedImage result =
                     new BufferedImage(
@@ -879,26 +724,18 @@ public class BorderedProductImageForm extends FillupForm {
                             BufferedImage.TYPE_INT_ARGB
                     );
 
-
             Graphics2D g =
                     result.createGraphics();
-
 
             g.setRenderingHint(
                     RenderingHints.KEY_ANTIALIASING,
                     RenderingHints.VALUE_ANTIALIAS_ON
             );
 
-
             g.setRenderingHint(
                     RenderingHints.KEY_TEXT_ANTIALIASING,
                     RenderingHints.VALUE_TEXT_ANTIALIAS_ON
             );
-
-
-            // -------------------------------------------------
-            // DRAW BARCODE
-            // -------------------------------------------------
 
             g.drawImage(
                     barcodeOnly,
@@ -909,11 +746,6 @@ public class BorderedProductImageForm extends FillupForm {
                     null
             );
 
-
-            // -------------------------------------------------
-            // BARCODE TEXT
-            // -------------------------------------------------
-
             Font barcodeFont =
                     new Font(
                             "Arial",
@@ -921,33 +753,22 @@ public class BorderedProductImageForm extends FillupForm {
                             scaledBarcodeFontSize
                     );
 
-
-            g.setFont(
-                    barcodeFont
-            );
-
-
-            g.setColor(
-                    Color.BLACK
-            );
-
+            g.setFont(barcodeFont);
+            g.setColor(Color.BLACK);
 
             int textWidth =
                     g.getFontMetrics()
                             .stringWidth(barcode);
 
-
             int textX =
                     (
-                            actualBarcodeWidth
-                            - textWidth
+                        actualBarcodeWidth
+                        - textWidth
                     ) / 2;
-
 
             int textY =
                     actualBarcodeHeight
                     + scaledBarcodeFontSize;
-
 
             g.drawString(
                     barcode,
@@ -955,9 +776,7 @@ public class BorderedProductImageForm extends FillupForm {
                     textY
             );
 
-
             g.dispose();
-
 
             return result;
 
@@ -969,9 +788,8 @@ public class BorderedProductImageForm extends FillupForm {
         }
     }
 
-
     // =========================================================
-    // BARCODE FONT SIZE
+    // BARCODE FONT
     // =========================================================
 
     private int getBarcodeFontSizeForImage() {
@@ -982,16 +800,13 @@ public class BorderedProductImageForm extends FillupForm {
                         imageActualHeight
                 );
 
-
         int dynamicFontSize =
                 (int) Math.round(
                         baseImageSize * 0.018
                 );
 
-
         dynamicFontSize +=
                 additionalFontSize / 2;
-
 
         return clamp(
                 dynamicFontSize,
@@ -999,7 +814,6 @@ public class BorderedProductImageForm extends FillupForm {
                 100
         );
     }
-
 
     // =========================================================
     // DETAILS WIDTH
@@ -1014,16 +828,13 @@ public class BorderedProductImageForm extends FillupForm {
             return 0;
         }
 
-
         int fontSize =
                 getDetailsFontSize();
-
 
         Font descriptionFont =
                 defaultFont.deriveFont(
                         (float) fontSize
                 );
-
 
         BufferedImage tempImage =
                 new BufferedImage(
@@ -1032,18 +843,12 @@ public class BorderedProductImageForm extends FillupForm {
                         BufferedImage.TYPE_INT_ARGB
                 );
 
-
         Graphics2D tempGraphics =
                 tempImage.createGraphics();
 
-
-        tempGraphics.setFont(
-                descriptionFont
-        );
-
+        tempGraphics.setFont(descriptionFont);
 
         int maxWidth = 0;
-
 
         for (
                 BorderedImageProductDescription desc :
@@ -1054,13 +859,11 @@ public class BorderedProductImageForm extends FillupForm {
                 continue;
             }
 
-
             String description =
                     desc.getDescription();
 
             String barcode =
                     desc.getBarcode();
-
 
             if (
                     description != null
@@ -1078,13 +881,10 @@ public class BorderedProductImageForm extends FillupForm {
                         );
             }
 
-
             if (
                     barcode != null
                     && !barcode.trim().isEmpty()
-                    && !barcode.equals(
-                            getFirstBarcode()
-                    )
+                    && !barcode.equals(getFirstBarcode())
             ) {
 
                 maxWidth =
@@ -1099,12 +899,10 @@ public class BorderedProductImageForm extends FillupForm {
             }
         }
 
-
         tempGraphics.dispose();
 
         return maxWidth;
     }
-
 
     // =========================================================
     // DETAILS HEIGHT
@@ -1119,13 +917,10 @@ public class BorderedProductImageForm extends FillupForm {
             return 0;
         }
 
-
         int height = 0;
-
 
         int fontSize =
                 getDetailsFontSize();
-
 
         for (
                 BorderedImageProductDescription desc :
@@ -1136,49 +931,38 @@ public class BorderedProductImageForm extends FillupForm {
                 continue;
             }
 
-
             String description =
                     desc.getDescription();
 
             String barcode =
                     desc.getBarcode();
 
-
             if (
                     description != null
                     && !description.trim().isEmpty()
             ) {
 
-                height +=
-                        fontSize + 2;
+                height += fontSize + 2;
             }
-
 
             if (
                     barcode != null
                     && !barcode.trim().isEmpty()
-                    && !barcode.equals(
-                            getFirstBarcode()
-                    )
+                    && !barcode.equals(getFirstBarcode())
             ) {
 
-                height +=
-                        fontSize + 2;
+                height += fontSize + 2;
             }
-
 
             height +=
                     desc.getMarginBottom();
-
 
             height +=
                     additionalMarginBottom;
         }
 
-
         return height;
     }
-
 
     // =========================================================
     // DETAILS FONT SIZE
@@ -1192,17 +976,14 @@ public class BorderedProductImageForm extends FillupForm {
                         imageActualHeight
                 );
 
-
         int dynamicFontSize =
                 (int) Math.round(
                         baseImageSize
                         * DETAILS_FONT_PERCENT
                 );
 
-
         dynamicFontSize +=
                 additionalFontSize;
-
 
         return clamp(
                 dynamicFontSize,
@@ -1211,9 +992,8 @@ public class BorderedProductImageForm extends FillupForm {
         );
     }
 
-
     // =========================================================
-    // DRAW PRODUCT DESCRIPTIONS
+    // PRODUCT DESCRIPTIONS
     // =========================================================
 
     private void drawProductDescriptions(
@@ -1229,30 +1009,18 @@ public class BorderedProductImageForm extends FillupForm {
             return;
         }
 
-
-        int y =
-                startY;
-
+        int y = startY;
 
         int fontSize =
                 getDetailsFontSize();
-
 
         Font descriptionFont =
                 defaultFont.deriveFont(
                         (float) fontSize
                 );
 
-
-        g.setFont(
-                descriptionFont
-        );
-
-
-        g.setColor(
-                fontColor
-        );
-
+        g.setFont(descriptionFont);
+        g.setColor(fontColor);
 
         for (
                 BorderedImageProductDescription desc :
@@ -1263,23 +1031,21 @@ public class BorderedProductImageForm extends FillupForm {
                 continue;
             }
 
-
             String description =
                     desc.getDescription();
 
             String barcode =
                     desc.getBarcode();
 
-
             if (
                     (
-                            description == null
-                            || description.trim().isEmpty()
+                        description == null
+                        || description.trim().isEmpty()
                     )
                     &&
                     (
-                            barcode == null
-                            || barcode.trim().isEmpty()
+                        barcode == null
+                        || barcode.trim().isEmpty()
                     )
             ) {
 
@@ -1287,7 +1053,6 @@ public class BorderedProductImageForm extends FillupForm {
 
                 continue;
             }
-
 
             if (
                     description != null
@@ -1302,18 +1067,13 @@ public class BorderedProductImageForm extends FillupForm {
                         availableWidth
                 );
 
-
-                y +=
-                        fontSize + 2;
+                y += fontSize + 2;
             }
-
 
             if (
                     barcode != null
                     && !barcode.trim().isEmpty()
-                    && !barcode.equals(
-                            getFirstBarcode()
-                    )
+                    && !barcode.equals(getFirstBarcode())
             ) {
 
                 drawCenteredText(
@@ -1324,21 +1084,16 @@ public class BorderedProductImageForm extends FillupForm {
                         availableWidth
                 );
 
-
-                y +=
-                        fontSize + 2;
+                y += fontSize + 2;
             }
-
 
             y +=
                     desc.getMarginBottom();
-
 
             y +=
                     additionalMarginBottom;
         }
     }
-
 
     // =========================================================
     // CENTER TEXT
@@ -1358,24 +1113,17 @@ public class BorderedProductImageForm extends FillupForm {
             return;
         }
 
-
         int textWidth =
                 g.getFontMetrics()
                         .stringWidth(text);
 
-
         int textX =
                 x
-                + (
-                        width
-                        - textWidth
-                ) / 2;
-
+                + (width - textWidth) / 2;
 
         if (textX < x) {
             textX = x;
         }
-
 
         g.drawString(
                 text,
@@ -1383,7 +1131,6 @@ public class BorderedProductImageForm extends FillupForm {
                 y
         );
     }
-
 
     // =========================================================
     // FIRST BARCODE
@@ -1398,7 +1145,6 @@ public class BorderedProductImageForm extends FillupForm {
             return null;
         }
 
-
         for (
                 BorderedImageProductDescription desc :
                 productDescriptions
@@ -1408,10 +1154,8 @@ public class BorderedProductImageForm extends FillupForm {
                 continue;
             }
 
-
             String barcode =
                     desc.getBarcode();
-
 
             if (
                     barcode != null
@@ -1422,10 +1166,8 @@ public class BorderedProductImageForm extends FillupForm {
             }
         }
 
-
         return null;
     }
-
 
     // =========================================================
     // CLAMP
@@ -1445,16 +1187,13 @@ public class BorderedProductImageForm extends FillupForm {
         );
     }
 
-
     // =========================================================
-    // IMAGE SIZE
+    // IMAGE
     // =========================================================
 
     public int getImageActualWidth() {
-
         return imageActualWidth;
     }
-
 
     public void setImageActualWidth(
             int imageActualWidth) {
@@ -1463,12 +1202,9 @@ public class BorderedProductImageForm extends FillupForm {
                 imageActualWidth;
     }
 
-
     public int getImageActualHeight() {
-
         return imageActualHeight;
     }
-
 
     public void setImageActualHeight(
             int imageActualHeight) {
@@ -1477,16 +1213,13 @@ public class BorderedProductImageForm extends FillupForm {
                 imageActualHeight;
     }
 
-
     // =========================================================
     // BORDER
     // =========================================================
 
     public int getBorderTopHeight() {
-
         return borderTopHeight;
     }
-
 
     public void setBorderTopHeight(
             int borderTopHeight) {
@@ -1495,12 +1228,9 @@ public class BorderedProductImageForm extends FillupForm {
                 borderTopHeight;
     }
 
-
     public int getBorderLeftWidth() {
-
         return borderLeftWidth;
     }
-
 
     public void setBorderLeftWidth(
             int borderLeftWidth) {
@@ -1509,16 +1239,13 @@ public class BorderedProductImageForm extends FillupForm {
                 borderLeftWidth;
     }
 
-
     // =========================================================
     // PRODUCT CODE
     // =========================================================
 
     public String getProductCode() {
-
         return productCode;
     }
-
 
     public void setProductCode(
             String productCode) {
@@ -1526,7 +1253,6 @@ public class BorderedProductImageForm extends FillupForm {
         this.productCode =
                 productCode;
     }
-
 
     // =========================================================
     // PRODUCT DESCRIPTIONS
@@ -1538,7 +1264,6 @@ public class BorderedProductImageForm extends FillupForm {
         return productDescriptions;
     }
 
-
     public void setProductDescriptions(
             List<BorderedImageProductDescription>
                     productDescriptions) {
@@ -1547,16 +1272,13 @@ public class BorderedProductImageForm extends FillupForm {
                 productDescriptions;
     }
 
-
     // =========================================================
     // BORDERED IMAGE
     // =========================================================
 
     public Image getBorderedImage() {
-
         return borderedImage;
     }
-
 
     public void setBorderedImage(
             Image borderImage) {
@@ -1565,16 +1287,9 @@ public class BorderedProductImageForm extends FillupForm {
                 borderImage;
     }
 
-
     // =========================================================
-    // FORM
+    // FORM MAX HEIGHT
     // =========================================================
-
-    @Override
-    protected void initializeForm() {
-
-    }
-
 
     public int getFormMaxHeight() {
 
@@ -1583,82 +1298,93 @@ public class BorderedProductImageForm extends FillupForm {
                 + 200;
     }
 
-
     // =========================================================
-    // QR SIZE
+    // QR GETTERS / SETTERS
     // =========================================================
 
     public int getQrWidth() {
-
         return qrWidth;
     }
 
+    public void setQrWidth(int qrWidth) {
 
-    public void setQrWidth(
-            int qrWidth) {
-
-        qrWidth =
+        int newSize =
                 clamp(
                         qrWidth,
                         MIN_QR_SIZE,
                         MAX_QR_SIZE
                 );
 
-
-        this.qrWidth =
-                qrWidth;
-
-
-        // QR MUST remain square
-
-        this.qrHeight =
-                qrWidth;
+        this.qrWidth = newSize;
+        this.qrHeight = newSize;
     }
 
-
     public int getQrHeight() {
-
         return qrHeight;
     }
 
+    public void setQrHeight(int qrHeight) {
 
-    public void setQrHeight(
-            int qrHeight) {
-
-        qrHeight =
+        int newSize =
                 clamp(
                         qrHeight,
                         MIN_QR_SIZE,
                         MAX_QR_SIZE
                 );
 
-
-        this.qrHeight =
-                qrHeight;
-
-
-        // QR MUST remain square
-
-        this.qrWidth =
-                qrHeight;
+        this.qrHeight = newSize;
+        this.qrWidth = newSize;
     }
 
+    /**
+     * Cumulative QR size adjustment.
+     */
+    public void adjustQrWidth(int adjustment) {
+
+        int newSize =
+                qrWidth + adjustment;
+
+        newSize =
+                clamp(
+                        newSize,
+                        MIN_QR_SIZE,
+                        MAX_QR_SIZE
+                );
+
+        this.qrWidth = newSize;
+        this.qrHeight = newSize;
+    }
+
+    /**
+     * Cumulative QR height adjustment.
+     */
+    public void adjustQrHeight(int adjustment) {
+
+        int newSize =
+                qrHeight + adjustment;
+
+        newSize =
+                clamp(
+                        newSize,
+                        MIN_QR_SIZE,
+                        MAX_QR_SIZE
+                );
+
+        this.qrHeight = newSize;
+        this.qrWidth = newSize;
+    }
 
     // =========================================================
     // BARCODE SIZE
     // =========================================================
 
     public int getBarcodeWidth() {
-
         return barcodeWidth;
     }
 
-
     public int getBarcodeHeight() {
-
         return barcodeHeight;
     }
-
 
     public void setBarcodeWidth(
             int barcodeWidth) {
@@ -1671,7 +1397,6 @@ public class BorderedProductImageForm extends FillupForm {
                 );
     }
 
-
     public void setBarcodeHeight(
             int barcodeHeight) {
 
@@ -1683,53 +1408,48 @@ public class BorderedProductImageForm extends FillupForm {
                 );
     }
 
-
-    // =========================================================
-    // BARCODE RESIZE
-    // =========================================================
-
+    /**
+     * Cumulative barcode size adjustment.
+     *
+     * Example:
+     *
+     * current = 500
+     * +3      = 503
+     * +2      = 505
+     * -3      = 502
+     */
     public void adjustBarcodeSize(
             int adjustment) {
 
         this.barcodeWidth =
                 clamp(
-                        this.barcodeWidth
-                        + adjustment,
+                        this.barcodeWidth + adjustment,
                         MIN_BARCODE_WIDTH,
                         MAX_BARCODE_WIDTH
                 );
 
-
         this.barcodeHeight =
                 clamp(
-                        this.barcodeHeight
-                        + adjustment,
+                        this.barcodeHeight + adjustment,
                         MIN_BARCODE_HEIGHT,
                         MAX_BARCODE_HEIGHT
                 );
     }
 
-
     // =========================================================
-    // TEXT SIZE
+    // ADDITIONAL FONT
     // =========================================================
 
     public int getAdditionalFontSize() {
-
         return additionalFontSize;
     }
 
-
     public void increaseAdditionalFontSize(
-            int additionalFontSize) {
+            int adjustment) {
 
-        this.additionalFontSize +=
-                additionalFontSize;
+        this.additionalFontSize += adjustment;
 
-
-        if (
-                this.additionalFontSize <= 0
-        ) {
+        if (this.additionalFontSize <= 0) {
 
             this.additionalFontSize = 0;
 
@@ -1746,98 +1466,74 @@ public class BorderedProductImageForm extends FillupForm {
                     );
 
             this.additionalMarginBottom +=
-                    additionalFontSize;
+                    adjustment;
         }
     }
-
 
     // =========================================================
     // TOP BORDER
     // =========================================================
 
     public int getAdditionalTopBorderHeight() {
-
         return additionalTopBorderHeight;
     }
 
-
     public void addSizeToAdditionalTopBorderHeight(
-            int additionalTopBorderHeight) {
+            int adjustment) {
 
         this.additionalTopBorderHeight +=
-                additionalTopBorderHeight;
+                adjustment;
 
-
-        if (
-                this.additionalTopBorderHeight < 0
-        ) {
-
+        if (this.additionalTopBorderHeight < 0) {
             this.additionalTopBorderHeight = 0;
         }
     }
-
 
     // =========================================================
     // BOTTOM BORDER
     // =========================================================
 
     public int getAdditionalBottomBorderHeight() {
-
         return additionalBottomBorderHeight;
     }
 
-
     public void addSizeAdditionalBottomBorderHeight(
-            int additionalBottomBorderHeight) {
+            int adjustment) {
 
         this.additionalBottomBorderHeight +=
-                additionalBottomBorderHeight;
+                adjustment;
 
-
-        if (
-                this.additionalBottomBorderHeight < 0
-        ) {
-
+        if (this.additionalBottomBorderHeight < 0) {
             this.additionalBottomBorderHeight = 0;
         }
     }
-
 
     // =========================================================
     // BORDER WIDTH
     // =========================================================
 
     public int getAdditionalBorderWidth() {
-
         return additionalBorderWidth;
     }
 
-
     public void addSizeToAdditionalBorderWidth(
-            int additionalBorderWidth) {
+            int adjustment) {
 
         this.additionalBorderWidth +=
-                additionalBorderWidth;
+                adjustment;
 
-
-        if (
-                this.additionalBorderWidth < 0
-        ) {
-
+        if (this.additionalBorderWidth < 0) {
             this.additionalBorderWidth = 0;
         }
     }
 
-
     // =========================================================
-    // BARCODE FONT
+    // BARCODE FONT SIZE
     // =========================================================
 
     public int getBarcodeFontSize() {
-
         return barcodeFontSize;
     }
-
 
     public void setBarcodeFontSize(
             int barcodeFontSize) {
@@ -1846,6 +1542,164 @@ public class BorderedProductImageForm extends FillupForm {
                 barcodeFontSize;
     }
 
+    // =========================================================
+    // QR POSITION
+    // =========================================================
+
+    public int getQrPositionX() {
+        return qrPositionX;
+    }
+
+    /**
+     * Absolute position setter.
+     */
+    public void setQrPositionX(
+            int qrPositionX) {
+
+        this.qrPositionX =
+                qrPositionX;
+    }
+
+    /**
+     * Cumulative position adjustment.
+     *
+     * +3 then +2 = +5
+     * +5 then -3 = +2
+     */
+    public void adjustQrPositionX(
+            int adjustment) {
+
+        this.qrPositionX +=
+                adjustment;
+    }
+
+    public int getQrPositionY() {
+        return qrPositionY;
+    }
+
+    /**
+     * Absolute position setter.
+     */
+    public void setQrPositionY(
+            int qrPositionY) {
+
+        this.qrPositionY =
+                qrPositionY;
+    }
+
+    /**
+     * Cumulative position adjustment.
+     */
+    public void adjustQrPositionY(
+            int adjustment) {
+
+        this.qrPositionY +=
+                adjustment;
+    }
+
+    // =========================================================
+    // BARCODE POSITION
+    // =========================================================
+
+    public int getBarcodePositionX() {
+        return barcodePositionX;
+    }
+
+    /**
+     * Absolute position setter.
+     */
+    public void setBarcodePositionX(
+            int barcodePositionX) {
+
+        this.barcodePositionX =
+                barcodePositionX;
+    }
+
+    /**
+     * Cumulative position adjustment.
+     */
+    public void adjustBarcodePositionX(
+            int adjustment) {
+
+        this.barcodePositionX +=
+                adjustment;
+    }
+
+    public int getBarcodePositionY() {
+        return barcodePositionY;
+    }
+
+    /**
+     * Absolute position setter.
+     */
+    public void setBarcodePositionY(
+            int barcodePositionY) {
+
+        this.barcodePositionY =
+                barcodePositionY;
+    }
+
+    /**
+     * Cumulative position adjustment.
+     */
+    public void adjustBarcodePositionY(
+            int adjustment) {
+
+        this.barcodePositionY +=
+                adjustment;
+    }
+
+    // =========================================================
+    // DETAILS POSITION
+    // =========================================================
+
+    public int getDetailsPositionX() {
+        return detailsPositionX;
+    }
+
+    /**
+     * Absolute position setter.
+     */
+    public void setDetailsPositionX(
+            int detailsPositionX) {
+
+        this.detailsPositionX =
+                detailsPositionX;
+    }
+
+    /**
+     * Cumulative position adjustment.
+     */
+    public void adjustDetailsPositionX(
+            int adjustment) {
+
+        this.detailsPositionX +=
+                adjustment;
+    }
+
+    public int getDetailsPositionY() {
+        return detailsPositionY;
+    }
+
+    /**
+     * Absolute position setter.
+     */
+    public void setDetailsPositionY(
+            int detailsPositionY) {
+
+        this.detailsPositionY =
+                detailsPositionY;
+    }
+
+    /**
+     * Cumulative position adjustment.
+     */
+    public void adjustDetailsPositionY(
+            int adjustment) {
+
+        this.detailsPositionY +=
+                adjustment;
+    }
 
     // =========================================================
     // COMPOSITE STATE
@@ -1854,20 +1708,15 @@ public class BorderedProductImageForm extends FillupForm {
     private static class CompositeState {
 
         private final Graphics2D graphics;
-
         private final Composite composite;
 
+        CompositeState(Graphics2D graphics) {
 
-        CompositeState(
-                Graphics2D graphics) {
-
-            this.graphics =
-                    graphics;
+            this.graphics = graphics;
 
             this.composite =
                     graphics.getComposite();
         }
-
 
         void restore() {
 

@@ -1,7 +1,13 @@
 package local.hqapp.utilities.productimageuploader.servlets;
 
+import java.awt.Image;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Base64;
+
+import javax.imageio.ImageIO;
 
 import com.google.gson.Gson;
 
@@ -15,106 +21,41 @@ import local.hqapp.utilities.productimageuploader.borderedproductimageform.Borde
 import local.hqapp.utilities.productimageuploader.datasource.UploadedImageSession;
 import local.hqapp.utilities.productimageuploader.datasource.UploadedImageSessionManager;
 
-
-/**
- * Servlet implementation class EditUploadedImageServlet
- */
 @WebServlet("/editUploadedImage")
-public class EditUploadedImageServlet
-        extends HttpServlet {
+public class EditUploadedImageServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
 
+    private final Gson gson = new Gson();
 
     public EditUploadedImageServlet() {
         super();
     }
 
-
     // =========================================================
     // GET
     // =========================================================
 
+    @Override
     protected void doGet(
             HttpServletRequest request,
             HttpServletResponse response)
             throws ServletException, IOException {
 
-        response.setContentType(
-                "application/json"
-        );
-
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
 
         // =====================================================
-        // PARAMETERS
+        // SESSION ID
         // =====================================================
-
-        String qrSizeParam =
-                request.getParameter(
-                        "qrSize"
-                );
-
-
-        String barcodeSizeParam =
-                request.getParameter(
-                        "barcodeSize"
-                );
-
 
         String idParam =
-                request.getParameter(
-                        "uploadedImageSessionId"
-                );
+                request.getParameter("uploadedImageSessionId");
 
+        if (idParam == null || idParam.trim().isEmpty()) {
 
-        String textSizeParam =
-                request.getParameter(
-                        "textSize"
-                );
-
-
-        String borderWidthParam =
-                request.getParameter(
-                        "borderWidth"
-                );
-
-
-        String topBorderHeightParam =
-                request.getParameter(
-                        "topBorderHeight"
-                );
-
-
-        String bottomBorderHeightParam =
-                request.getParameter(
-                        "bottomBorderHeight"
-                );
-
-
-        EditUploadedImageResponse resp =
-                new EditUploadedImageResponse();
-
-
-        resp.setQrSizeUpdated(false);
-
-        resp.setBarcodeSizeUpdated(false);
-
-        resp.setTextSizeUpdated(false);
-
-        resp.setBorderWidthUpdated(false);
-
-        resp.setTopBorderHeightUpdated(false);
-
-        resp.setBottomBorderHeightUpdated(false);
-
-
-        // =====================================================
-        // SESSION
-        // =====================================================
-
-        if (idParam == null) {
-
-            response.sendError(
+            sendError(
+                    response,
                     HttpServletResponse.SC_BAD_REQUEST,
                     "Missing uploadedImageSessionId"
             );
@@ -122,19 +63,16 @@ public class EditUploadedImageServlet
             return;
         }
 
-
         int id;
 
         try {
 
-            id =
-                    Integer.parseInt(
-                            idParam
-                    );
+            id = Integer.parseInt(idParam);
 
         } catch (NumberFormatException e) {
 
-            response.sendError(
+            sendError(
+                    response,
                     HttpServletResponse.SC_BAD_REQUEST,
                     "Invalid uploadedImageSessionId"
             );
@@ -142,16 +80,19 @@ public class EditUploadedImageServlet
             return;
         }
 
+        // =====================================================
+        // SESSION
+        // =====================================================
 
         UploadedImageSession uploadedImageSession =
                 UploadedImageSessionManager
                         .getInstance()
                         .get(id);
 
-
         if (uploadedImageSession == null) {
 
-            response.sendError(
+            sendError(
+                    response,
                     HttpServletResponse.SC_NOT_FOUND,
                     "Uploaded image session not found"
             );
@@ -159,15 +100,18 @@ public class EditUploadedImageServlet
             return;
         }
 
+        // =====================================================
+        // FORM
+        // =====================================================
 
-        BorderedProductImageForm f =
+        BorderedProductImageForm form =
                 uploadedImageSession
                         .getBorderedProductImageForm();
 
+        if (form == null) {
 
-        if (f == null) {
-
-            response.sendError(
+            sendError(
+                    response,
                     HttpServletResponse.SC_NOT_FOUND,
                     "BorderedProductImageForm not found"
             );
@@ -175,350 +119,519 @@ public class EditUploadedImageServlet
             return;
         }
 
+        // =====================================================
+        // RESPONSE
+        // =====================================================
+
+        EditUploadedImageResponse resp =
+                new EditUploadedImageResponse();
+
+        resp.setQrSizeUpdated(false);
+        resp.setBarcodeSizeUpdated(false);
+        resp.setTextSizeUpdated(false);
+        resp.setBorderWidthUpdated(false);
+        resp.setTopBorderHeightUpdated(false);
+        resp.setBottomBorderHeightUpdated(false);
 
         // =====================================================
-        // QR SIZE
+        // SIZE PARAMETERS
         // =====================================================
 
-        if (qrSizeParam != null) {
+        String qrSize =
+                request.getParameter("qrSize");
+
+        String barcodeSize =
+                request.getParameter("barcodeSize");
+
+        String textSize =
+                request.getParameter("textSize");
+
+        String borderWidth =
+                request.getParameter("borderWidth");
+
+        String topBorderHeight =
+                request.getParameter("topBorderHeight");
+
+        String bottomBorderHeight =
+                request.getParameter("bottomBorderHeight");
+
+        // =====================================================
+        // POSITION PARAMETERS
+        // =====================================================
+
+        String barcodeX =
+                request.getParameter("barcodeX");
+
+        String barcodeY =
+                request.getParameter("barcodeY");
+
+        String qrX =
+                request.getParameter("qrX");
+
+        String qrY =
+                request.getParameter("qrY");
+
+        String detailsX =
+                request.getParameter("detailsX");
+
+        String detailsY =
+                request.getParameter("detailsY");
+
+        // =====================================================
+        // RESIZE
+        // =====================================================
+
+        if (qrSize != null) {
 
             resizeQr(
                     resp,
-                    f,
-                    qrSizeParam
+                    form,
+                    qrSize
             );
         }
 
-
-        // =====================================================
-        // BARCODE SIZE
-        // =====================================================
-
-        if (barcodeSizeParam != null) {
+        if (barcodeSize != null) {
 
             resizeBarcode(
                     resp,
-                    f,
-                    barcodeSizeParam
+                    form,
+                    barcodeSize
             );
         }
 
-
-        // =====================================================
-        // TEXT SIZE
-        // =====================================================
-
-        if (textSizeParam != null) {
+        if (textSize != null) {
 
             resizeText(
                     resp,
-                    f,
-                    textSizeParam
+                    form,
+                    textSize
             );
         }
 
-
-        // =====================================================
-        // BORDER WIDTH
-        // =====================================================
-
-        if (borderWidthParam != null) {
+        if (borderWidth != null) {
 
             adjustBorderWidth(
                     resp,
-                    f,
-                    borderWidthParam
+                    form,
+                    borderWidth
             );
         }
 
-
-        // =====================================================
-        // TOP BORDER
-        // =====================================================
-
-        if (topBorderHeightParam != null) {
+        if (topBorderHeight != null) {
 
             adjustTopBorderHeight(
                     resp,
-                    f,
-                    topBorderHeightParam
+                    form,
+                    topBorderHeight
             );
         }
 
-
-        // =====================================================
-        // BOTTOM BORDER
-        // =====================================================
-
-        if (bottomBorderHeightParam != null) {
+        if (bottomBorderHeight != null) {
 
             adjustBottomBorderHeight(
                     resp,
-                    f,
-                    bottomBorderHeightParam
+                    form,
+                    bottomBorderHeight
             );
         }
 
+        // =====================================================
+        // UPDATE POSITIONS
+        // =====================================================
+
+        updateBarcodePosition(
+                form,
+                barcodeX,
+                barcodeY
+        );
+
+        updateQrPosition(
+                form,
+                qrX,
+                qrY
+        );
+
+        updateDetailsPosition(
+                form,
+                detailsX,
+                detailsY
+        );
 
         // =====================================================
-        // RESPONSE
+        // GENERATE UPDATED IMAGE
+        // =====================================================
+
+        Image generatedImage =
+                form.createImage();
+
+        if (generatedImage == null) {
+
+            sendError(
+                    response,
+                    HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                    "Unable to generate image"
+            );
+
+            return;
+        }
+
+        // =====================================================
+        // CONVERT IMAGE TO BASE64
+        // =====================================================
+
+        String imageBase64 =
+                convertImageToBase64(
+                        generatedImage
+                );
+
+        // =====================================================
+        // RETURN CURRENT STATE
+        // =====================================================
+
+        resp.setQrPositionX(
+                form.getQrPositionX()
+        );
+
+        resp.setQrPositionY(
+                form.getQrPositionY()
+        );
+
+        resp.setBarcodePositionX(
+                form.getBarcodePositionX()
+        );
+
+        resp.setBarcodePositionY(
+                form.getBarcodePositionY()
+        );
+
+        resp.setDetailsPositionY(
+                form.getDetailsPositionX()
+        );
+
+        resp.setDetailsPositionY(
+                form.getDetailsPositionY()
+        );
+
+        resp.setQrWidth(
+                form.getQrWidth()
+        );
+
+        resp.setQrHeight(
+                form.getQrHeight()
+        );
+
+        resp.setBarcodeWidth(
+                form.getBarcodeWidth()
+        );
+
+        resp.setBarcodeHeight(
+                form.getBarcodeHeight()
+        );
+
+        resp.setImage(
+                imageBase64
+        );
+
+        // =====================================================
+        // JSON RESPONSE
         // =====================================================
 
         PrintWriter writer =
                 response.getWriter();
 
-
         writer.print(
-                toJSON(resp)
+                gson.toJson(resp)
         );
 
-
         writer.flush();
-
-        writer.close();
     }
 
+    // =========================================================
+    // BARCODE POSITION
+    // =========================================================
+
+    private void updateBarcodePosition(
+            BorderedProductImageForm form,
+            String xParam,
+            String yParam) {
+
+        if (xParam != null) {
+
+            try {
+
+                int x =
+                        Integer.parseInt(
+                                xParam
+                        );
+
+                form.setBarcodePositionX(x);
+
+            } catch (NumberFormatException e) {
+
+                // Ignore invalid X
+            }
+        }
+
+        if (yParam != null) {
+
+            try {
+
+                int y =
+                        Integer.parseInt(
+                                yParam
+                        );
+
+                form.setBarcodePositionY(y);
+
+            } catch (NumberFormatException e) {
+
+                // Ignore invalid Y
+            }
+        }
+    }
 
     // =========================================================
-    // BARCODE RESIZE
+    // QR POSITION
+    // =========================================================
+
+    private void updateQrPosition(
+            BorderedProductImageForm form,
+            String xParam,
+            String yParam) {
+
+        if (xParam != null) {
+
+            try {
+
+                int x =
+                        Integer.parseInt(
+                                xParam
+                        );
+
+                form.setQrPositionX(x);
+
+            } catch (NumberFormatException e) {
+
+                // Ignore invalid X
+            }
+        }
+
+        if (yParam != null) {
+
+            try {
+
+                int y =
+                        Integer.parseInt(
+                                yParam
+                        );
+
+                form.setQrPositionY(y);
+
+            } catch (NumberFormatException e) {
+
+                // Ignore invalid Y
+            }
+        }
+    }
+
+    // =========================================================
+    // DETAILS POSITION
+    // =========================================================
+
+    private void updateDetailsPosition(
+            BorderedProductImageForm form,
+            String xParam,
+            String yParam) {
+
+        if (xParam != null) {
+
+            try {
+
+                int x =
+                        Integer.parseInt(
+                                xParam
+                        );
+
+                form.setDetailsPositionX(x);
+
+            } catch (NumberFormatException e) {
+
+                // Ignore invalid X
+            }
+        }
+
+        if (yParam != null) {
+
+            try {
+
+                int y =
+                        Integer.parseInt(
+                                yParam
+                        );
+
+                form.setDetailsPositionY(y);
+
+            } catch (NumberFormatException e) {
+
+                // Ignore invalid Y
+            }
+        }
+    }
+
+    // =========================================================
+    // BARCODE SIZE
     // =========================================================
 
     private void resizeBarcode(
             EditUploadedImageResponse resp,
-            BorderedProductImageForm f,
-            String barcodeSizeParam) {
+            BorderedProductImageForm form,
+            String value) {
 
         resp.setBarcodeSizeUpdated(true);
 
+        switch (value) {
 
-        if (
-                "+1".equals(
-                        barcodeSizeParam
-                )
-        ) {
+            case "+1":
+                form.adjustBarcodeSize(30);
+                break;
 
-            f.adjustBarcodeSize(30);
+            case "+2":
+                form.adjustBarcodeSize(60);
+                break;
 
-        } else if (
-                "+2".equals(
-                        barcodeSizeParam
-                )
-        ) {
+            case "+3":
+                form.adjustBarcodeSize(120);
+                break;
 
-            f.adjustBarcodeSize(60);
+            case "-1":
+                form.adjustBarcodeSize(-30);
+                break;
 
-        } else if (
-                "+3".equals(
-                        barcodeSizeParam
-                )
-        ) {
+            case "-2":
+                form.adjustBarcodeSize(-60);
+                break;
 
-            f.adjustBarcodeSize(120);
+            case "-3":
+                form.adjustBarcodeSize(-120);
+                break;
 
-        } else if (
-                "-1".equals(
-                        barcodeSizeParam
-                )
-        ) {
-
-            f.adjustBarcodeSize(-30);
-
-        } else if (
-                "-2".equals(
-                        barcodeSizeParam
-                )
-        ) {
-
-            f.adjustBarcodeSize(-60);
-
-        } else if (
-                "-3".equals(
-                        barcodeSizeParam
-                )
-        ) {
-
-            f.adjustBarcodeSize(-120);
-
-        } else {
-
-            resp.setBarcodeSizeUpdated(false);
+            default:
+                resp.setBarcodeSizeUpdated(false);
+                break;
         }
     }
 
-
     // =========================================================
-    // QR RESIZE
+    // QR SIZE
     // =========================================================
 
     private void resizeQr(
             EditUploadedImageResponse resp,
-            BorderedProductImageForm f,
-            String qrSizeParam) {
+            BorderedProductImageForm form,
+            String value) {
 
         resp.setQrSizeUpdated(true);
 
+        switch (value) {
 
-        if (
-                "+1".equals(
-                        qrSizeParam
-                )
-        ) {
+            case "+1":
 
-            adjustQrSize(
-                    f,
-                    30
-            );
+                form.setQrWidth(
+                        form.getQrWidth() + 30
+                );
 
-        } else if (
-                "-1".equals(
-                        qrSizeParam
-                )
-        ) {
+                break;
 
-            adjustQrSize(
-                    f,
-                    -30
-            );
+            case "+2":
 
-        } else if (
-                "+2".equals(
-                        qrSizeParam
-                )
-        ) {
+                form.setQrWidth(
+                        form.getQrWidth() + 60
+                );
 
-            adjustQrSize(
-                    f,
-                    60
-            );
+                break;
 
-        } else if (
-                "-2".equals(
-                        qrSizeParam
-                )
-        ) {
+            case "+3":
 
-            adjustQrSize(
-                    f,
-                    -60
-            );
+                form.setQrWidth(
+                        form.getQrWidth() + 120
+                );
 
-        } else if (
-                "+3".equals(
-                        qrSizeParam
-                )
-        ) {
+                break;
 
-            adjustQrSize(
-                    f,
-                    120
-            );
+            case "-1":
 
-        } else if (
-                "-3".equals(
-                        qrSizeParam
-                )
-        ) {
+                form.setQrWidth(
+                        form.getQrWidth() - 30
+                );
 
-            adjustQrSize(
-                    f,
-                    -120
-            );
+                break;
 
-        } else {
+            case "-2":
 
-            resp.setQrSizeUpdated(false);
+                form.setQrWidth(
+                        form.getQrWidth() - 60
+                );
+
+                break;
+
+            case "-3":
+
+                form.setQrWidth(
+                        form.getQrWidth() - 120
+                );
+
+                break;
+
+            default:
+
+                resp.setQrSizeUpdated(false);
+
+                break;
         }
     }
 
-
     // =========================================================
-    // QR ADJUSTMENT
-    // =========================================================
-
-    private void adjustQrSize(
-            BorderedProductImageForm f,
-            int adjustment) {
-
-        int currentSize =
-                f.getQrWidth();
-
-
-        int newSize =
-                currentSize + adjustment;
-
-
-        f.setQrWidth(
-                newSize
-        );
-    }
-
-
-    // =========================================================
-    // TEXT RESIZE
+    // TEXT SIZE
     // =========================================================
 
     private void resizeText(
             EditUploadedImageResponse resp,
-            BorderedProductImageForm f,
-            String textSizeParam) {
+            BorderedProductImageForm form,
+            String value) {
 
         resp.setTextSizeUpdated(true);
 
+        switch (value) {
 
-        if (
-                "+1".equals(
-                        textSizeParam
-                )
-        ) {
+            case "+1":
+                form.increaseAdditionalFontSize(2);
+                break;
 
-            f.increaseAdditionalFontSize(2);
+            case "+2":
+                form.increaseAdditionalFontSize(5);
+                break;
 
-        } else if (
-                "+2".equals(
-                        textSizeParam
-                )
-        ) {
+            case "+3":
+                form.increaseAdditionalFontSize(10);
+                break;
 
-            f.increaseAdditionalFontSize(5);
+            case "-1":
+                form.increaseAdditionalFontSize(-2);
+                break;
 
-        } else if (
-                "+3".equals(
-                        textSizeParam
-                )
-        ) {
+            case "-2":
+                form.increaseAdditionalFontSize(-5);
+                break;
 
-            f.increaseAdditionalFontSize(10);
+            case "-3":
+                form.increaseAdditionalFontSize(-10);
+                break;
 
-        } else if (
-                "-1".equals(
-                        textSizeParam
-                )
-        ) {
-
-            f.increaseAdditionalFontSize(-2);
-
-        } else if (
-                "-2".equals(
-                        textSizeParam
-                )
-        ) {
-
-            f.increaseAdditionalFontSize(-5);
-
-        } else if (
-                "-3".equals(
-                        textSizeParam
-                )
-        ) {
-
-            f.increaseAdditionalFontSize(-10);
-
-        } else {
-
-            resp.setTextSizeUpdated(false);
+            default:
+                resp.setTextSizeUpdated(false);
+                break;
         }
     }
-
 
     // =========================================================
     // BORDER WIDTH
@@ -526,66 +639,42 @@ public class EditUploadedImageServlet
 
     private void adjustBorderWidth(
             EditUploadedImageResponse resp,
-            BorderedProductImageForm f,
-            String borderWidthParam) {
+            BorderedProductImageForm form,
+            String value) {
 
         resp.setBorderWidthUpdated(true);
 
+        switch (value) {
 
-        if (
-                "+1".equals(
-                        borderWidthParam
-                )
-        ) {
+            case "+1":
+                form.addSizeToAdditionalBorderWidth(50);
+                break;
 
-            f.addSizeToAdditionalBorderWidth(50);
+            case "+2":
+                form.addSizeToAdditionalBorderWidth(100);
+                break;
 
-        } else if (
-                "+2".equals(
-                        borderWidthParam
-                )
-        ) {
+            case "+3":
+                form.addSizeToAdditionalBorderWidth(150);
+                break;
 
-            f.addSizeToAdditionalBorderWidth(100);
+            case "-1":
+                form.addSizeToAdditionalBorderWidth(-50);
+                break;
 
-        } else if (
-                "+3".equals(
-                        borderWidthParam
-                )
-        ) {
+            case "-2":
+                form.addSizeToAdditionalBorderWidth(-100);
+                break;
 
-            f.addSizeToAdditionalBorderWidth(150);
+            case "-3":
+                form.addSizeToAdditionalBorderWidth(-150);
+                break;
 
-        } else if (
-                "-1".equals(
-                        borderWidthParam
-                )
-        ) {
-
-            f.addSizeToAdditionalBorderWidth(-50);
-
-        } else if (
-                "-2".equals(
-                        borderWidthParam
-                )
-        ) {
-
-            f.addSizeToAdditionalBorderWidth(-100);
-
-        } else if (
-                "-3".equals(
-                        borderWidthParam
-                )
-        ) {
-
-            f.addSizeToAdditionalBorderWidth(-150);
-
-        } else {
-
-            resp.setBorderWidthUpdated(false);
+            default:
+                resp.setBorderWidthUpdated(false);
+                break;
         }
     }
-
 
     // =========================================================
     // TOP BORDER
@@ -593,66 +682,42 @@ public class EditUploadedImageServlet
 
     private void adjustTopBorderHeight(
             EditUploadedImageResponse resp,
-            BorderedProductImageForm f,
-            String topBorderHeightParam) {
+            BorderedProductImageForm form,
+            String value) {
 
         resp.setTopBorderHeightUpdated(true);
 
+        switch (value) {
 
-        if (
-                "+1".equals(
-                        topBorderHeightParam
-                )
-        ) {
+            case "+1":
+                form.addSizeToAdditionalTopBorderHeight(50);
+                break;
 
-            f.addSizeToAdditionalTopBorderHeight(50);
+            case "+2":
+                form.addSizeToAdditionalTopBorderHeight(100);
+                break;
 
-        } else if (
-                "+2".equals(
-                        topBorderHeightParam
-                )
-        ) {
+            case "+3":
+                form.addSizeToAdditionalTopBorderHeight(150);
+                break;
 
-            f.addSizeToAdditionalTopBorderHeight(100);
+            case "-1":
+                form.addSizeToAdditionalTopBorderHeight(-50);
+                break;
 
-        } else if (
-                "+3".equals(
-                        topBorderHeightParam
-                )
-        ) {
+            case "-2":
+                form.addSizeToAdditionalTopBorderHeight(-100);
+                break;
 
-            f.addSizeToAdditionalTopBorderHeight(150);
+            case "-3":
+                form.addSizeToAdditionalTopBorderHeight(-150);
+                break;
 
-        } else if (
-                "-1".equals(
-                        topBorderHeightParam
-                )
-        ) {
-
-            f.addSizeToAdditionalTopBorderHeight(-50);
-
-        } else if (
-                "-2".equals(
-                        topBorderHeightParam
-                )
-        ) {
-
-            f.addSizeToAdditionalTopBorderHeight(-100);
-
-        } else if (
-                "-3".equals(
-                        topBorderHeightParam
-                )
-        ) {
-
-            f.addSizeToAdditionalTopBorderHeight(-150);
-
-        } else {
-
-            resp.setTopBorderHeightUpdated(false);
+            default:
+                resp.setTopBorderHeightUpdated(false);
+                break;
         }
     }
-
 
     // =========================================================
     // BOTTOM BORDER
@@ -660,84 +725,119 @@ public class EditUploadedImageServlet
 
     private void adjustBottomBorderHeight(
             EditUploadedImageResponse resp,
-            BorderedProductImageForm f,
-            String bottomBorderHeightParam) {
+            BorderedProductImageForm form,
+            String value) {
 
         resp.setBottomBorderHeightUpdated(true);
 
+        switch (value) {
 
-        if (
-                "+1".equals(
-                        bottomBorderHeightParam
-                )
-        ) {
+            case "+1":
+                form.addSizeAdditionalBottomBorderHeight(50);
+                break;
 
-            f.addSizeAdditionalBottomBorderHeight(50);
+            case "+2":
+                form.addSizeAdditionalBottomBorderHeight(100);
+                break;
 
-        } else if (
-                "+2".equals(
-                        bottomBorderHeightParam
-                )
-        ) {
+            case "+3":
+                form.addSizeAdditionalBottomBorderHeight(150);
+                break;
 
-            f.addSizeAdditionalBottomBorderHeight(100);
+            case "-1":
+                form.addSizeAdditionalBottomBorderHeight(-50);
+                break;
 
-        } else if (
-                "+3".equals(
-                        bottomBorderHeightParam
-                )
-        ) {
+            case "-2":
+                form.addSizeAdditionalBottomBorderHeight(-100);
+                break;
 
-            f.addSizeAdditionalBottomBorderHeight(150);
+            case "-3":
+                form.addSizeAdditionalBottomBorderHeight(-150);
+                break;
 
-        } else if (
-                "-1".equals(
-                        bottomBorderHeightParam
-                )
-        ) {
-
-            f.addSizeAdditionalBottomBorderHeight(-50);
-
-        } else if (
-                "-2".equals(
-                        bottomBorderHeightParam
-                )
-        ) {
-
-            f.addSizeAdditionalBottomBorderHeight(-100);
-
-        } else if (
-                "-3".equals(
-                        bottomBorderHeightParam
-                )
-        ) {
-
-            f.addSizeAdditionalBottomBorderHeight(-150);
-
-        } else {
-
-            resp.setBottomBorderHeightUpdated(false);
+            default:
+                resp.setBottomBorderHeightUpdated(false);
+                break;
         }
     }
 
-
     // =========================================================
-    // JSON
+    // IMAGE -> BASE64
     // =========================================================
 
-    private String toJSON(
-            EditUploadedImageResponse resp) {
+    private String convertImageToBase64(
+            Image image)
+            throws IOException {
 
-        return new Gson().toJson(
-                resp
+        BufferedImage bufferedImage;
+
+        if (image instanceof BufferedImage) {
+
+            bufferedImage =
+                    (BufferedImage) image;
+
+        } else {
+
+            bufferedImage =
+                    new BufferedImage(
+                            image.getWidth(null),
+                            image.getHeight(null),
+                            BufferedImage.TYPE_INT_RGB
+                    );
+
+            bufferedImage
+                    .getGraphics()
+                    .drawImage(
+                            image,
+                            0,
+                            0,
+                            null
+                    );
+        }
+
+        ByteArrayOutputStream output =
+                new ByteArrayOutputStream();
+
+        ImageIO.write(
+                bufferedImage,
+                "png",
+                output
         );
+
+        return Base64
+                .getEncoder()
+                .encodeToString(
+                        output.toByteArray()
+                );
     }
 
+    // =========================================================
+    // ERROR
+    // =========================================================
+
+    private void sendError(
+            HttpServletResponse response,
+            int status,
+            String message)
+            throws IOException {
+
+        response.setStatus(status);
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+
+        response.getWriter().print(
+                gson.toJson(
+                        new ErrorResponse(message)
+                )
+        );
+    }
 
     // =========================================================
     // POST
     // =========================================================
 
+    @Override
     protected void doPost(
             HttpServletRequest request,
             HttpServletResponse response)
@@ -747,5 +847,24 @@ public class EditUploadedImageServlet
                 request,
                 response
         );
+    }
+
+    // =========================================================
+    // ERROR RESPONSE
+    // =========================================================
+
+    private static class ErrorResponse {
+
+        private String error;
+
+        public ErrorResponse(String error) {
+
+            this.error = error;
+        }
+
+        public String getError() {
+
+            return error;
+        }
     }
 }

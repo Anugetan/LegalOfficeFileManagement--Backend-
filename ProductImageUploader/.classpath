@@ -16,5 +16,6 @@
 	</classpathentry>
 	<classpathentry kind="lib" path="//win2012-server/ee_dev/jar/qrcodejar/core-3.4.0.jar"/>
 	<classpathentry kind="lib" path="//win2012-server/ee_dev/jar/qrcodejar/zxing-javase-1.7.jar"/>
+	<classpathentry kind="lib" path="C:/Users/developer/eclipse-workspace/InventoryManagementBackend/src/main/webapp/WEB-INF/lib/gson-2.8.8.jar"/>
 	<classpathentry kind="output" path="build/classes"/>
 </classpath>
