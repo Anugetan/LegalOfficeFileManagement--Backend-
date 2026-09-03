@@ -18,7 +18,7 @@ public class CorsConfig {
 
         // Allow Angular application hosted on Vercel
         configuration.setAllowedOrigins(List.of(
-            "https://legal-office-file-management-frontend-anugetan.vercel.app"
+            "https://legaloffice-management.vercel.app"
         ));
 
         // Allow HTTP methods used by the Angular application
