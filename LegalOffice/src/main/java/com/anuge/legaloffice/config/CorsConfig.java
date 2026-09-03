@@ -16,10 +16,12 @@ public class CorsConfig {
 
         CorsConfiguration configuration = new CorsConfiguration();
 
+        // Allow Angular application hosted on Vercel
         configuration.setAllowedOrigins(List.of(
             "https://legal-office-file-management-anugetan.vercel.app"
         ));
 
+        // Allow HTTP methods used by the Angular application
         configuration.setAllowedMethods(List.of(
             "GET",
             "POST",
@@ -28,11 +30,13 @@ public class CorsConfig {
             "OPTIONS"
         ));
 
+        // Allow headers used by Angular/JWT
         configuration.setAllowedHeaders(List.of(
             "Authorization",
             "Content-Type"
         ));
 
+        // Allow credentials such as Authorization headers/cookies
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source =
