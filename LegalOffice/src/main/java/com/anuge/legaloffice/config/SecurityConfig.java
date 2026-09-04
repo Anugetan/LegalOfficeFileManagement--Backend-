@@ -67,34 +67,28 @@ public class SecurityConfig {
             HttpSecurity http) throws Exception {
 
         http
-            // REST API - disable CSRF
+     
             .csrf(csrf -> csrf.disable())
 
-            // Enable CORS
+  
             .cors(cors -> {})
 
-            // JWT does not use HTTP sessions
             .sessionManagement(session ->
                 session.sessionCreationPolicy(
                     SessionCreationPolicy.STATELESS
                 )
             )
 
-            // Explicitly use our authentication provider
             .authenticationProvider(authenticationProvider())
 
-            // Authorization
             .authorizeHttpRequests(auth -> auth
 
-                // Public endpoints
                 .requestMatchers("/api/auth/login").permitAll()
                 .requestMatchers("/api/auth/register").permitAll()
 
-                // Everything else requires authentication
                 .anyRequest().authenticated()
             )
 
-            // JWT filter
             .addFilterBefore(
                 jwtAuthenticationFilter,
                 UsernamePasswordAuthenticationFilter.class
