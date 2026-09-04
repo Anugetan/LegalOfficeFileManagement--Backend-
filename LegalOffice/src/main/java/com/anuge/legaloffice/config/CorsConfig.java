@@ -2,6 +2,7 @@ package com.anuge.legaloffice.config;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
@@ -11,17 +12,20 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @Configuration
 public class CorsConfig {
 
+    @Value("${app.cors.allowed-origin}")
+    private String allowedOrigin;
+
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
 
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // Allow Angular application hosted on Vercel
+        // Dynamic frontend origin
         configuration.setAllowedOrigins(List.of(
-            "https://legaloffice.vercel.app"
+            allowedOrigin
         ));
 
-        // Allow HTTP methods used by the Angular application
+        // HTTP methods
         configuration.setAllowedMethods(List.of(
             "GET",
             "POST",
@@ -30,13 +34,13 @@ public class CorsConfig {
             "OPTIONS"
         ));
 
-        // Allow headers used by Angular/JWT
+        // Headers
         configuration.setAllowedHeaders(List.of(
             "Authorization",
             "Content-Type"
         ));
 
-        // Allow credentials such as Authorization headers/cookies
+        // Credentials
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source =
