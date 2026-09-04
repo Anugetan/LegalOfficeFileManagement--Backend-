@@ -11,4 +11,5 @@ public interface LegalFileRepository extends JpaRepository<LegalFile, Long> {
     Optional<LegalFile> findByCaseNo(String caseNo);
 
     boolean existsByCaseNo(String caseNo);
+    
 }
