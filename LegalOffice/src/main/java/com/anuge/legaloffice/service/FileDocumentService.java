@@ -9,7 +9,6 @@ import com.anuge.legaloffice.entity.Users;
 import com.anuge.legaloffice.repository.DocumentFormatRepository;
 import com.anuge.legaloffice.repository.FileDocumentRepository;
 import com.anuge.legaloffice.repository.LegalFileRepository;
-
 import com.anuge.legaloffice.repository.UserRepository;
 
 import org.springframework.stereotype.Service;
@@ -283,6 +282,16 @@ public class FileDocumentService {
                 .toList();
     }
     
+    public FileDocument getDocumentById(Long documentId) {
+
+        return fileDocumentRepository
+                .findById(documentId)
+                .orElseThrow(() ->
+                        new RuntimeException(
+                                "Document not found: " + documentId
+                        )
+                );
+    }
     private String getExtension(String fileName) {
 
         int index = fileName.lastIndexOf('.');
