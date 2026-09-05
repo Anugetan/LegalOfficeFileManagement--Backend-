@@ -145,4 +145,31 @@ public class FileDocumentController {
 
                 .body(resource);
     }
+    
+		 // ==========================================
+		 // REPLACE EXISTING DOCUMENT
+		 // ==========================================
+
+		 @PutMapping(
+		         value = "/{documentId}/replace",
+		         consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+		 )
+		 public ResponseEntity<FileUploadResponse> replaceFile(
+		         @PathVariable Long documentId,
+		         @RequestParam MultipartFile file,
+		         Authentication authentication
+		 ) throws Exception {
+		
+		     String username =
+		             authentication.getName();
+		
+		     FileUploadResponse response =
+		             fileDocumentService.replaceFile(
+		                     documentId,
+		                     file,
+		                     username
+		             );
+		
+		     return ResponseEntity.ok(response);
+		 }
 }
