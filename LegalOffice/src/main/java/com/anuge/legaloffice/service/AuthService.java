@@ -21,7 +21,6 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
 
-
     public AuthService(
             UserRepository userRepository,
             PasswordEncoder passwordEncoder,
@@ -34,7 +33,11 @@ public class AuthService {
         this.jwtService = jwtService;
     }
 
+
+    // =====================================================
     // REGISTER
+    // =====================================================
+
     public AuthResponse register(RegisterRequest request) {
 
         // Check username
@@ -46,47 +49,80 @@ public class AuthService {
             );
         }
 
+
         // Check email
-        if (request.getEmail() != null &&
-            !request.getEmail().isBlank() &&
-            userRepository.existsByEmail(
-                request.getEmail())) {
+        if (request.getEmail() != null
+                && !request.getEmail().isBlank()
+                && userRepository.existsByEmail(
+                        request.getEmail())) {
 
             throw new RuntimeException(
                     "Email already exists"
             );
         }
 
+
         // Create user
         Users user = new Users();
 
-        user.setUsername(request.getUsername());
-        user.setFullName(request.getFullName());
-        user.setEmail(request.getEmail());
+        user.setUsername(
+                request.getUsername()
+        );
 
-        // IMPORTANT:
-        // Never store the plain password
+        user.setFullName(
+                request.getFullName()
+        );
+
+        user.setEmail(
+                request.getEmail()
+        );
+
+
+        // =================================================
+        // PASSWORD
+        // =================================================
+
         user.setPasswordHash(
                 passwordEncoder.encode(
                         request.getPassword()
                 )
         );
 
+
+        // =================================================
+        // DEFAULT USER SETTINGS
+        // =================================================
+
         user.setRole("USER");
+
         user.setActive(true);
 
-        // Save
-        Users savedUser = userRepository.save(user);
 
-        // Generate JWT
+        // =================================================
+        // SAVE USER
+        // =================================================
+
+        Users savedUser =
+                userRepository.save(user);
+
+
+        // =================================================
+        // GENERATE JWT
+        // =================================================
+
         String token =
                 jwtService.generateToken(
                         savedUser.getUsername()
                 );
 
-        // Return
+
+        // =================================================
+        // RETURN RESPONSE
+        // =================================================
+
         return new AuthResponse(
                 token,
+                savedUser.getId(),
                 savedUser.getUsername(),
                 savedUser.getFullName(),
                 savedUser.getRole()
@@ -94,36 +130,70 @@ public class AuthService {
     }
 
 
+    // =====================================================
     // LOGIN
-    public AuthResponse login(LoginRequest request) {
-    	
-        Users user = userRepository
-                .findByUsername(request.getUsername())
-                .orElseThrow(() ->
-                    new RuntimeException("User not found")
-                );
+    // =====================================================
 
-        boolean passwordMatches =
-                passwordEncoder.matches(
-                    request.getPassword(),
-                    user.getPasswordHash()
-                );
+    public AuthResponse login(LoginRequest request) {
+
+        // =================================================
+        // FIND USER
+        // =================================================
+
+    	
+        Users user =
+                userRepository
+                        .findByUsername(
+                                request.getUsername()
+                        )
+                        .orElseThrow(() ->
+                                new RuntimeException(
+                                        "User not found"
+                                )
+                        );
+
+        System.out.println("USER ID: " + user.getId());
+    	System.out.println("USERNAME: " + user.getUsername());
+    	System.out.println("FULL NAME: " + user.getFullName());
+
+        // =================================================
+        // AUTHENTICATE USER
+        // =================================================
 
         Authentication authentication =
                 authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(
-                        request.getUsername(),
-                        request.getPassword()
-                    )
+                        new UsernamePasswordAuthenticationToken(
+                                request.getUsername(),
+                                request.getPassword()
+                        )
                 );
 
-//        System.out.println("AUTHENTICATION SUCCESS!");
-        String username = authentication.getName();
 
-        String token = jwtService.generateToken(username);
+        // =================================================
+        // GET AUTHENTICATED USERNAME
+        // =================================================
+
+        String username =
+                authentication.getName();
+
+
+        // =================================================
+        // GENERATE JWT
+        // =================================================
+
+        String token =
+                jwtService.generateToken(
+                        username
+                );
+
+
+        // =================================================
+        // RETURN RESPONSE
+        // =================================================
 
         return new AuthResponse(
                 token,
+                user.getId(),
                 user.getUsername(),
                 user.getFullName(),
                 user.getRole()

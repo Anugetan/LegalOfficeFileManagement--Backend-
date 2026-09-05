@@ -2,21 +2,28 @@ package com.anuge.legaloffice.service;
 
 import java.util.List;
 
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.anuge.legaloffice.dto.LegalFileRequest;
 import com.anuge.legaloffice.entity.DocumentFormat;
 import com.anuge.legaloffice.entity.DocumentType;
+import com.anuge.legaloffice.entity.FileAction;
 import com.anuge.legaloffice.entity.LegalFile;
 import com.anuge.legaloffice.entity.Office;
 import com.anuge.legaloffice.entity.SpmsType;
 import com.anuge.legaloffice.entity.Status;
+import com.anuge.legaloffice.entity.Users;
 import com.anuge.legaloffice.repository.DocumentFormatRepository;
 import com.anuge.legaloffice.repository.DocumentTypeRepository;
+import com.anuge.legaloffice.repository.FileActionRepository;
 import com.anuge.legaloffice.repository.LegalFileRepository;
 import com.anuge.legaloffice.repository.OfficeRepository;
 import com.anuge.legaloffice.repository.SpmsTypeRepository;
 import com.anuge.legaloffice.repository.StatusRepository;
+import com.anuge.legaloffice.repository.UserRepository;
+
 
 @Service
 public class LegalFileService {
@@ -28,6 +35,9 @@ public class LegalFileService {
     private final DocumentTypeRepository documentTypeRepository;
     private final DocumentFormatRepository documentFormatRepository;
 
+    private final FileActionRepository fileActionRepository;
+    private final UserRepository usersRepository;
+
 
     public LegalFileService(
             LegalFileRepository legalFileRepository,
@@ -35,7 +45,9 @@ public class LegalFileService {
             SpmsTypeRepository spmsTypeRepository,
             OfficeRepository officeRepository,
             DocumentTypeRepository documentTypeRepository,
-            DocumentFormatRepository documentFormatRepository) {
+            DocumentFormatRepository documentFormatRepository,
+            FileActionRepository fileActionRepository,
+            UserRepository usersRepository) {
 
         this.legalFileRepository = legalFileRepository;
         this.statusRepository = statusRepository;
@@ -43,6 +55,82 @@ public class LegalFileService {
         this.officeRepository = officeRepository;
         this.documentTypeRepository = documentTypeRepository;
         this.documentFormatRepository = documentFormatRepository;
+
+        this.fileActionRepository = fileActionRepository;
+        this.usersRepository = usersRepository;
+    }
+
+
+    // =========================================
+    // GET CURRENT AUTHENTICATED USER
+    // =========================================
+
+    private Users getCurrentUser() {
+
+        Authentication authentication =
+                SecurityContextHolder
+                        .getContext()
+                        .getAuthentication();
+
+
+        // CHECK AUTHENTICATION
+
+        if (authentication == null ||
+            !authentication.isAuthenticated() ||
+            authentication.getName() == null ||
+            authentication.getName().equals("anonymousUser")) {
+
+            throw new RuntimeException(
+                "No authenticated user found"
+            );
+        }
+
+
+        // GET USERNAME FROM JWT
+
+        String username = authentication.getName();
+
+
+        System.out.println(
+            "AUTHENTICATED USER = " + username
+        );
+
+
+        // FIND USER IN DATABASE
+
+        return usersRepository
+                .findByUsername(username)
+                .orElseThrow(() ->
+                    new RuntimeException(
+                        "Authenticated user not found: "
+                        + username
+                    )
+                );
+    }
+
+
+    // =========================================
+    // CREATE FILE ACTION
+    // =========================================
+
+    private FileAction createFileAction(
+            LegalFile legalFile,
+            String action,
+            String fromStage,
+            String toStage,
+            String remarks,
+            Users performedBy) {
+
+        FileAction fileAction = new FileAction();
+
+        fileAction.setLegalFile(legalFile);
+        fileAction.setAction(action);
+        fileAction.setFromStage(fromStage);
+        fileAction.setToStage(toStage);
+        fileAction.setRemarks(remarks);
+        fileAction.setPerformedBy(performedBy);
+
+        return fileActionRepository.save(fileAction);
     }
 
 
@@ -80,7 +168,8 @@ public class LegalFileService {
         return legalFileRepository.findByCaseNo(caseNo)
                 .orElseThrow(() ->
                     new RuntimeException(
-                        "Legal file not found with case number: " + caseNo
+                        "Legal file not found with case number: "
+                        + caseNo
                     )
                 );
     }
@@ -90,19 +179,39 @@ public class LegalFileService {
     // CREATE LEGAL FILE
     // =========================================
 
-    public LegalFile createLegalFile(LegalFileRequest request) {
+    public LegalFile createLegalFile(
+            LegalFileRequest request) {
+
+
+        // =========================================
+        // GET CURRENT USER
+        // =========================================
+
+        Users currentUser = getCurrentUser();
+
 
         System.out.println(
-            "STATUS ID FROM REQUEST = " + request.getStatusId()
+            "CREATING LEGAL FILE BY USER = "
+            + currentUser.getUsername()
         );
 
 
-        // CHECK DUPLICATE CASE NUMBER
+        System.out.println(
+            "STATUS ID FROM REQUEST = "
+            + request.getStatusId()
+        );
 
-        if (legalFileRepository.existsByCaseNo(request.getCaseNo())) {
+
+        // =========================================
+        // CHECK DUPLICATE CASE NUMBER
+        // =========================================
+
+        if (legalFileRepository.existsByCaseNo(
+                request.getCaseNo())) {
 
             throw new RuntimeException(
-                "Case number already exists: " + request.getCaseNo()
+                "Case number already exists: "
+                + request.getCaseNo()
             );
         }
 
@@ -114,12 +223,38 @@ public class LegalFileService {
         // BASIC DATA
         // =========================================
 
-        legalFile.setCaseNo(request.getCaseNo());
-        legalFile.setDateReceived(request.getDateReceived());
-        legalFile.setTimeReceived(request.getTimeReceived());
-        legalFile.setDateCompleted(request.getDateCompleted());
-        legalFile.setContactDetails(request.getContactDetails());
-        legalFile.setCurrentStage(request.getCurrentStage());
+        legalFile.setCaseNo(
+            request.getCaseNo()
+        );
+
+        legalFile.setDateReceived(
+            request.getDateReceived()
+        );
+
+        legalFile.setTimeReceived(
+            request.getTimeReceived()
+        );
+
+        legalFile.setDateCompleted(
+            request.getDateCompleted()
+        );
+
+        legalFile.setContactDetails(
+            request.getContactDetails()
+        );
+
+        legalFile.setCurrentStage(
+            request.getCurrentStage()
+        );
+
+
+        // =========================================
+        // CREATED BY
+        // =========================================
+
+        legalFile.setCreatedBy(
+            currentUser
+        );
 
 
         // =========================================
@@ -162,16 +297,21 @@ public class LegalFileService {
 
         if (request.getSpmsTypeId() != null) {
 
-            SpmsType spmsType = spmsTypeRepository
-                    .findById(request.getSpmsTypeId())
-                    .orElseThrow(() ->
-                        new RuntimeException(
-                            "SPMS Type not found with id: "
-                            + request.getSpmsTypeId()
+            SpmsType spmsType =
+                    spmsTypeRepository
+                        .findById(
+                            request.getSpmsTypeId()
                         )
-                    );
+                        .orElseThrow(() ->
+                            new RuntimeException(
+                                "SPMS Type not found with id: "
+                                + request.getSpmsTypeId()
+                            )
+                        );
 
-            legalFile.setSpmsType(spmsType);
+            legalFile.setSpmsType(
+                spmsType
+            );
         }
 
 
@@ -181,16 +321,21 @@ public class LegalFileService {
 
         if (request.getRequestingOfficeId() != null) {
 
-            Office office = officeRepository
-                    .findById(request.getRequestingOfficeId())
-                    .orElseThrow(() ->
-                        new RuntimeException(
-                            "Office not found with id: "
-                            + request.getRequestingOfficeId()
+            Office office =
+                    officeRepository
+                        .findById(
+                            request.getRequestingOfficeId()
                         )
-                    );
+                        .orElseThrow(() ->
+                            new RuntimeException(
+                                "Office not found with id: "
+                                + request.getRequestingOfficeId()
+                            )
+                        );
 
-            legalFile.setRequestingOffice(office);
+            legalFile.setRequestingOffice(
+                office
+            );
         }
 
 
@@ -200,16 +345,21 @@ public class LegalFileService {
 
         if (request.getDocumentTypeId() != null) {
 
-            DocumentType documentType = documentTypeRepository
-                    .findById(request.getDocumentTypeId())
-                    .orElseThrow(() ->
-                        new RuntimeException(
-                            "Document Type not found with id: "
-                            + request.getDocumentTypeId()
+            DocumentType documentType =
+                    documentTypeRepository
+                        .findById(
+                            request.getDocumentTypeId()
                         )
-                    );
+                        .orElseThrow(() ->
+                            new RuntimeException(
+                                "Document Type not found with id: "
+                                + request.getDocumentTypeId()
+                            )
+                        );
 
-            legalFile.setDocumentType(documentType);
+            legalFile.setDocumentType(
+                documentType
+            );
         }
 
 
@@ -219,16 +369,21 @@ public class LegalFileService {
 
         if (request.getDocumentFormatId() != null) {
 
-            DocumentFormat documentFormat = documentFormatRepository
-                    .findById(request.getDocumentFormatId())
-                    .orElseThrow(() ->
-                        new RuntimeException(
-                            "Document Format not found with id: "
-                            + request.getDocumentFormatId()
+            DocumentFormat documentFormat =
+                    documentFormatRepository
+                        .findById(
+                            request.getDocumentFormatId()
                         )
-                    );
+                        .orElseThrow(() ->
+                            new RuntimeException(
+                                "Document Format not found with id: "
+                                + request.getDocumentFormatId()
+                            )
+                        );
 
-            legalFile.setDocumentFormat(documentFormat);
+            legalFile.setDocumentFormat(
+                documentFormat
+            );
         }
 
 
@@ -246,7 +401,31 @@ public class LegalFileService {
         );
 
 
-        return legalFileRepository.save(legalFile);
+        // =========================================
+        // SAVE LEGAL FILE
+        // =========================================
+
+        LegalFile savedLegalFile =
+                legalFileRepository.save(
+                    legalFile
+                );
+
+
+        // =========================================
+        // CREATE FILE ACTION
+        // =========================================
+
+        createFileAction(
+            savedLegalFile,
+            "FILE CREATED",
+            null,
+            savedLegalFile.getCurrentStage(),
+            "Legal file created",
+            currentUser
+        );
+
+
+        return savedLegalFile;
     }
 
 
@@ -257,6 +436,11 @@ public class LegalFileService {
     public LegalFile updateLegalFile(
             Long id,
             LegalFileRequest request) {
+
+
+        // =========================================
+        // FIND EXISTING FILE
+        // =========================================
 
         LegalFile existingLegalFile =
                 getLegalFileById(id);
@@ -302,16 +486,21 @@ public class LegalFileService {
 
         if (request.getStatusId() != null) {
 
-            Status status = statusRepository
-                    .findById(request.getStatusId())
-                    .orElseThrow(() ->
-                        new RuntimeException(
-                            "Status not found with id: "
-                            + request.getStatusId()
+            Status status =
+                    statusRepository
+                        .findById(
+                            request.getStatusId()
                         )
-                    );
+                        .orElseThrow(() ->
+                            new RuntimeException(
+                                "Status not found with id: "
+                                + request.getStatusId()
+                            )
+                        );
 
-            existingLegalFile.setStatus(status);
+            existingLegalFile.setStatus(
+                status
+            );
         }
 
 
@@ -321,16 +510,21 @@ public class LegalFileService {
 
         if (request.getSpmsTypeId() != null) {
 
-            SpmsType spmsType = spmsTypeRepository
-                    .findById(request.getSpmsTypeId())
-                    .orElseThrow(() ->
-                        new RuntimeException(
-                            "SPMS Type not found with id: "
-                            + request.getSpmsTypeId()
+            SpmsType spmsType =
+                    spmsTypeRepository
+                        .findById(
+                            request.getSpmsTypeId()
                         )
-                    );
+                        .orElseThrow(() ->
+                            new RuntimeException(
+                                "SPMS Type not found with id: "
+                                + request.getSpmsTypeId()
+                            )
+                        );
 
-            existingLegalFile.setSpmsType(spmsType);
+            existingLegalFile.setSpmsType(
+                spmsType
+            );
         }
 
 
@@ -340,16 +534,21 @@ public class LegalFileService {
 
         if (request.getRequestingOfficeId() != null) {
 
-            Office office = officeRepository
-                    .findById(request.getRequestingOfficeId())
-                    .orElseThrow(() ->
-                        new RuntimeException(
-                            "Office not found with id: "
-                            + request.getRequestingOfficeId()
+            Office office =
+                    officeRepository
+                        .findById(
+                            request.getRequestingOfficeId()
                         )
-                    );
+                        .orElseThrow(() ->
+                            new RuntimeException(
+                                "Office not found with id: "
+                                + request.getRequestingOfficeId()
+                            )
+                        );
 
-            existingLegalFile.setRequestingOffice(office);
+            existingLegalFile.setRequestingOffice(
+                office
+            );
         }
 
 
@@ -359,16 +558,21 @@ public class LegalFileService {
 
         if (request.getDocumentTypeId() != null) {
 
-            DocumentType documentType = documentTypeRepository
-                    .findById(request.getDocumentTypeId())
-                    .orElseThrow(() ->
-                        new RuntimeException(
-                            "Document Type not found with id: "
-                            + request.getDocumentTypeId()
+            DocumentType documentType =
+                    documentTypeRepository
+                        .findById(
+                            request.getDocumentTypeId()
                         )
-                    );
+                        .orElseThrow(() ->
+                            new RuntimeException(
+                                "Document Type not found with id: "
+                                + request.getDocumentTypeId()
+                            )
+                        );
 
-            existingLegalFile.setDocumentType(documentType);
+            existingLegalFile.setDocumentType(
+                documentType
+            );
         }
 
 
@@ -378,20 +582,31 @@ public class LegalFileService {
 
         if (request.getDocumentFormatId() != null) {
 
-            DocumentFormat documentFormat = documentFormatRepository
-                    .findById(request.getDocumentFormatId())
-                    .orElseThrow(() ->
-                        new RuntimeException(
-                            "Document Format not found with id: "
-                            + request.getDocumentFormatId()
+            DocumentFormat documentFormat =
+                    documentFormatRepository
+                        .findById(
+                            request.getDocumentFormatId()
                         )
-                    );
+                        .orElseThrow(() ->
+                            new RuntimeException(
+                                "Document Format not found with id: "
+                                + request.getDocumentFormatId()
+                            )
+                        );
 
-            existingLegalFile.setDocumentFormat(documentFormat);
+            existingLegalFile.setDocumentFormat(
+                documentFormat
+            );
         }
 
 
-        return legalFileRepository.save(existingLegalFile);
+        // =========================================
+        // SAVE
+        // =========================================
+
+        return legalFileRepository.save(
+            existingLegalFile
+        );
     }
 
 
@@ -403,13 +618,26 @@ public class LegalFileService {
             Long id,
             Long statusId) {
 
+
+        // =========================================
         // FIND LEGAL FILE
+        // =========================================
 
         LegalFile legalFile =
                 getLegalFileById(id);
 
 
+        // =========================================
+        // GET CURRENT USER
+        // =========================================
+
+        Users currentUser =
+                getCurrentUser();
+
+
+        // =========================================
         // VALIDATE STATUS ID
+        // =========================================
 
         if (statusId == null) {
 
@@ -419,41 +647,98 @@ public class LegalFileService {
         }
 
 
-        // FIND STATUS
+        // =========================================
+        // GET OLD STATUS
+        // =========================================
 
-        Status status = statusRepository
-                .findById(statusId)
-                .orElseThrow(() ->
-                    new RuntimeException(
-                        "Status not found with id: "
-                        + statusId
-                    )
+        String oldStatus =
+                legalFile.getStatus() != null
+                    ? legalFile.getStatus().getStatusName()
+                    : "NONE";
+
+
+        // =========================================
+        // FIND NEW STATUS
+        // =========================================
+
+        Status status =
+                statusRepository
+                    .findById(statusId)
+                    .orElseThrow(() ->
+                        new RuntimeException(
+                            "Status not found with id: "
+                            + statusId
+                        )
+                    );
+
+
+        // =========================================
+        // SET NEW STATUS
+        // =========================================
+
+        legalFile.setStatus(
+            status
+        );
+
+
+        // =========================================
+        // DEBUG
+        // =========================================
+
+        System.out.println(
+            "UPDATING LEGAL FILE ID = "
+            + id
+        );
+
+        System.out.println(
+            "OLD STATUS = "
+            + oldStatus
+        );
+
+        System.out.println(
+            "NEW STATUS ID = "
+            + status.getId()
+        );
+
+        System.out.println(
+            "NEW STATUS NAME = "
+            + status.getStatusName()
+        );
+
+        System.out.println(
+            "UPDATED BY = "
+            + currentUser.getUsername()
+        );
+
+
+        // =========================================
+        // SAVE LEGAL FILE
+        // =========================================
+
+        LegalFile savedLegalFile =
+                legalFileRepository.save(
+                    legalFile
                 );
 
 
-        // SET STATUS
+        // =========================================
+        // CREATE STATUS ACTION
+        // =========================================
 
-        legalFile.setStatus(status);
-
-
-        // DEBUG
-
-        System.out.println(
-            "UPDATING LEGAL FILE ID = " + id
-        );
-
-        System.out.println(
-            "NEW STATUS ID = " + status.getId()
-        );
-
-        System.out.println(
-            "NEW STATUS NAME = " + status.getStatusName()
+        createFileAction(
+            savedLegalFile,
+            "STATUS CHANGED",
+            null,
+            null,
+            "Status changed from "
+                + oldStatus
+                + " to "
+                + status.getStatusName(),
+            currentUser
         );
 
 
-        // SAVE
-
-        return legalFileRepository.save(legalFile);
+        return savedLegalFile;
     }
 
 
@@ -466,7 +751,8 @@ public class LegalFileService {
         if (!legalFileRepository.existsById(id)) {
 
             throw new RuntimeException(
-                "Legal file not found with id: " + id
+                "Legal file not found with id: "
+                + id
             );
         }
 
