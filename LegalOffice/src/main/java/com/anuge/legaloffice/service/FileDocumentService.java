@@ -282,6 +282,173 @@ public class FileDocumentService {
                 .toList();
     }
     
+    
+    public FileUploadResponse replaceFile(
+            Long documentId,
+            MultipartFile newFile,
+            String username
+    ) throws IOException {
+
+        // 1. Validate the new file
+        validateFile(newFile);
+
+        // 2. Find the existing document
+        FileDocument document = fileDocumentRepository
+                .findById(documentId)
+                .orElseThrow(() ->
+                        new RuntimeException(
+                                "Document not found: " + documentId
+                        )
+                );
+
+        // 3. Find the logged-in user
+        Users user = userRepository
+                .findByUsername(username)
+                .orElseThrow(() ->
+                        new RuntimeException(
+                                "User not found: " + username
+                        )
+                );
+
+        // 4. Get the new original filename
+        String originalFileName =
+                newFile.getOriginalFilename();
+
+        if (originalFileName == null ||
+                originalFileName.isBlank()) {
+
+            throw new RuntimeException(
+                    "Invalid file name"
+            );
+        }
+
+        // 5. Delete the old physical file
+        String oldFilePath =
+                document.getFilePath();
+
+        if (oldFilePath != null &&
+                !oldFilePath.isBlank()) {
+
+            Path oldPath =
+                    Paths.get(oldFilePath);
+
+            if (Files.exists(oldPath)) {
+                Files.delete(oldPath);
+            }
+        }
+
+        // 6. Get the existing legal file
+        LegalFile legalFile =
+                document.getLegalFile();
+
+        // 7. Get the case directory
+        Path caseDirectory =
+                uploadDirectory.resolve(
+                        sanitizeFileName(
+                                legalFile.getCaseNo()
+                        )
+                );
+
+        Files.createDirectories(caseDirectory);
+
+        // 8. Get file extension
+        String extension =
+                getExtension(originalFileName);
+
+        // 9. Generate new unique stored filename
+        String storedFileName =
+                UUID.randomUUID() + extension;
+
+        // 10. Create new physical file path
+        Path targetPath =
+                caseDirectory.resolve(
+                        storedFileName
+                );
+
+        // 11. Save the new physical file
+        Files.copy(
+                newFile.getInputStream(),
+                targetPath,
+                StandardCopyOption.REPLACE_EXISTING
+        );
+
+        // 12. Update existing database record
+        document.setDocumentName(
+                originalFileName
+        );
+
+        document.setFilePath(
+                targetPath.toString()
+        );
+
+        document.setFileSize(
+                newFile.getSize()
+        );
+
+        document.setMimeType(
+                newFile.getContentType()
+        );
+
+        document.setUploadedBy(
+                user
+        );
+
+        // Optional: increase version
+        document.setVersion(
+                document.getVersion() + 1
+        );
+
+        // 13. Save updated record
+        FileDocument saved =
+                fileDocumentRepository.save(document);
+
+        // 14. Create response
+        FileUploadResponse response =
+                new FileUploadResponse();
+
+        response.setId(
+                saved.getId()
+        );
+
+        response.setFileId(
+                saved.getLegalFile().getId()
+        );
+
+        response.setDocumentName(
+                saved.getDocumentName()
+        );
+
+        response.setFileName(
+                saved.getDocumentName()
+        );
+
+        response.setFileSize(
+                saved.getFileSize()
+        );
+
+        response.setMimeType(
+                saved.getMimeType()
+        );
+
+        response.setVersion(
+                saved.getVersion()
+        );
+
+        response.setIsFinal(
+                saved.getIsFinal()
+        );
+
+        response.setUploadedBy(
+                user.getUsername()
+        );
+
+        response.setUploadedAt(
+                saved.getUploadedAt()
+        );
+
+        return response;
+    }
+    
     public FileDocument getDocumentById(Long documentId) {
 
         return fileDocumentRepository
