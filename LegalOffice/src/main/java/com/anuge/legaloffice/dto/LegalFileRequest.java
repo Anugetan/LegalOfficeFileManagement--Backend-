@@ -1,12 +1,13 @@
 package com.anuge.legaloffice.dto;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 
 public class LegalFileRequest {
 
     private String caseNo;
-    private String dateReceived;
-    private String timeReceived;
+    private LocalDate dateReceived;
+    private LocalTime timeReceived;
     private LocalDate dateCompleted;
 
     private Long statusId;
@@ -25,15 +26,13 @@ public class LegalFileRequest {
         return caseNo;
     }
 
-    public String getDateReceived() {
-        return dateReceived;
-    }
 
-    public String getTimeReceived() {
-        return timeReceived;
-    }
+    public LocalTime getTimeReceived() {
+		return timeReceived;
+	}
 
-    public LocalDate getDateCompleted() {
+
+	public LocalDate getDateCompleted() {
         return dateCompleted;
     }
 
@@ -72,15 +71,26 @@ public class LegalFileRequest {
         this.caseNo = caseNo;
     }
 
-    public void setDateReceived(String dateReceived) {
-        this.dateReceived = dateReceived;
-    }
+    
 
-    public void setTimeReceived(String timeReceived) {
-        this.timeReceived = timeReceived;
-    }
+    public LocalDate getDateReceived() {
+		return dateReceived;
+	}
 
-    public void setDateCompleted(LocalDate dateCompleted) {
+
+
+	public void setDateReceived(LocalDate dateReceived) {
+		this.dateReceived = dateReceived;
+	}
+
+
+	public void setTimeReceived(LocalTime timeReceived) {
+		this.timeReceived = timeReceived;
+	}
+
+
+
+	public void setDateCompleted(LocalDate dateCompleted) {
         this.dateCompleted = dateCompleted;
     }
 

@@ -2,6 +2,7 @@ package com.anuge.legaloffice.dto;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 import com.anuge.legaloffice.entity.LegalFile;
 
@@ -9,32 +10,19 @@ public class LegalFileResponse {
 
     private Long id;
     private String caseNo;
-    private String dateReceived;
-    private String timeReceived;
-    private LocalDate dateCompleted;
+    private LocalDate dateReceived;
 
+    private LocalTime timeReceived;
+    private LocalDate dateCompleted;
     private Long statusId;
     private String statusName;
-
     private Long spmsTypeId;
     private String spmsTypeName;
-
     private Long requestingOfficeId;
     private String requestingOfficeName;
-    
-    private String documentTypeName;
     private Long documentTypeId;
-
-    public Long getDocumentTypeId() {
-		return documentTypeId;
-	}
-
-
-	public void setDocumentTypeId(Long documentTypeId) {
-		this.documentTypeId = documentTypeId;
-	}
-
-	private Long documentFormatId;
+    private String documentTypeName;
+    private Long documentFormatId;
     private String documentFormatName;
     private String contactDetails;
     private String currentStage;
@@ -42,6 +30,10 @@ public class LegalFileResponse {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
+
+    // =====================================================
+    // CONSTRUCTOR
+    // =====================================================
 
     public LegalFileResponse(LegalFile legalFile) {
 
@@ -55,225 +47,267 @@ public class LegalFileResponse {
         this.createdAt = legalFile.getCreatedAt();
         this.updatedAt = legalFile.getUpdatedAt();
 
-
+        // =================================================
         // STATUS
+        // =================================================
+
         if (legalFile.getStatus() != null) {
-            this.statusId = legalFile.getStatus().getId();
-            this.statusName = legalFile.getStatus().getStatusName();
+
+            this.statusId =
+                    legalFile.getStatus().getId();
+
+            this.statusName =
+                    legalFile.getStatus().getStatusName();
         }
 
-
+        // =================================================
         // SPMS TYPE
+        // =================================================
+
         if (legalFile.getSpmsType() != null) {
 
-            this.spmsTypeId = legalFile.getSpmsType().getId();
-            this.spmsTypeName = legalFile.getSpmsType().getSpmsName();
+            this.spmsTypeId =
+                    legalFile.getSpmsType().getId();
+
+            this.spmsTypeName =
+                    legalFile.getSpmsType().getSpmsName();
         }
 
 
+        // =================================================
         // REQUESTING OFFICE
+        // =================================================
+
         if (legalFile.getRequestingOffice() != null) {
 
-            this.requestingOfficeId = legalFile.getRequestingOffice().getId();
-            this.requestingOfficeName =  legalFile.getRequestingOffice().getOfficeName();
+            this.requestingOfficeId =
+                    legalFile.getRequestingOffice().getId();
+
+            this.requestingOfficeName =
+                    legalFile.getRequestingOffice().getOfficeName();
         }
 
 
+        // =================================================
         // DOCUMENT TYPE
-     // DOCUMENT TYPE
+        // =================================================
+
         if (legalFile.getDocumentType() != null) {
 
-            this.documentTypeId = legalFile.getDocumentType().getId();
-            this.documentTypeName = legalFile.getDocumentType().getDocumentName();
+            this.documentTypeId =
+                    legalFile.getDocumentType().getId();
+
+            this.documentTypeName =
+                    legalFile.getDocumentType().getDocumentName();
         }
 
 
+        // =================================================
         // DOCUMENT FORMAT
+        // =================================================
+
         if (legalFile.getDocumentFormat() != null) {
 
-            this.documentFormatId = legalFile.getDocumentFormat().getId();
-            this.documentFormatName = legalFile.getDocumentFormat().getFormatName();
+            this.documentFormatId =
+                    legalFile.getDocumentFormat().getId();
+
+            this.documentFormatName =
+                    legalFile.getDocumentFormat().getFormatName();
         }
 
 
+        // =================================================
         // CREATED BY
+        // =================================================
+
         if (legalFile.getCreatedBy() != null) {
 
-            this.createdById = legalFile.getCreatedBy().getId();
+            this.createdById =
+                    legalFile.getCreatedBy().getId();
         }
     }
 
 
-    // GETTERS
+    // =====================================================
+    // GETTERS / SETTERS
+    // =====================================================
 
-    public void setId(Long id) {
-		this.id = id;
-	}
-
-
-	public void setCaseNo(String caseNo) {
-		this.caseNo = caseNo;
-	}
-
-
-	public void setDateReceived(String dateReceived) {
-		this.dateReceived = dateReceived;
-	}
-
-
-	public void setTimeReceived(String timeReceived) {
-		this.timeReceived = timeReceived;
-	}
-
-
-	public void setDateCompleted(LocalDate dateCompleted) {
-		this.dateCompleted = dateCompleted;
-	}
-
-
-	public void setStatusId(Long statusId) {
-		this.statusId = statusId;
-	}
-
-
-	public void setStatusName(String statusName) {
-		this.statusName = statusName;
-	}
-
-
-	public void setSpmsTypeId(Long spmsTypeId) {
-		this.spmsTypeId = spmsTypeId;
-	}
-
-
-	public void setSpmsTypeName(String spmsTypeName) {
-		this.spmsTypeName = spmsTypeName;
-	}
-
-
-	public void setRequestingOfficeId(Long requestingOfficeId) {
-		this.requestingOfficeId = requestingOfficeId;
-	}
-
-
-	public void setRequestingOfficeName(String requestingOfficeName) {
-		this.requestingOfficeName = requestingOfficeName;
-	}
-
-
-	public void setDocumentTypeName(String documentTypeName) {
-		this.documentTypeName = documentTypeName;
-	}
-
-
-	public void setDocumentFormatId(Long documentFormatId) {
-		this.documentFormatId = documentFormatId;
-	}
-
-
-	public void setDocumentFormatName(String documentFormatName) {
-		this.documentFormatName = documentFormatName;
-	}
-
-
-	public void setContactDetails(String contactDetails) {
-		this.contactDetails = contactDetails;
-	}
-
-
-	public void setCurrentStage(String currentStage) {
-		this.currentStage = currentStage;
-	}
-
-
-	public void setCreatedById(Long createdById) {
-		this.createdById = createdById;
-	}
-
-
-	public void setCreatedAt(LocalDateTime createdAt) {
-		this.createdAt = createdAt;
-	}
-
-
-	public void setUpdatedAt(LocalDateTime updatedAt) {
-		this.updatedAt = updatedAt;
-	}
-
-
-	public Long getId() {
+    public Long getId() {
         return id;
     }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
 
     public String getCaseNo() {
         return caseNo;
     }
 
-    public String getDateReceived() {
+    public void setCaseNo(String caseNo) {
+        this.caseNo = caseNo;
+    }
+
+
+    public LocalDate getDateReceived() {
         return dateReceived;
     }
 
-    public String getTimeReceived() {
+    public void setDateReceived(LocalDate dateReceived) {
+        this.dateReceived = dateReceived;
+    }
+
+
+    public LocalTime getTimeReceived() {
         return timeReceived;
     }
+
+    public void setTimeReceived(LocalTime timeReceived) {
+        this.timeReceived = timeReceived;
+    }
+
 
     public LocalDate getDateCompleted() {
         return dateCompleted;
     }
 
+    public void setDateCompleted(LocalDate dateCompleted) {
+        this.dateCompleted = dateCompleted;
+    }
+
+
     public Long getStatusId() {
         return statusId;
     }
+
+    public void setStatusId(Long statusId) {
+        this.statusId = statusId;
+    }
+
 
     public String getStatusName() {
         return statusName;
     }
 
+    public void setStatusName(String statusName) {
+        this.statusName = statusName;
+    }
+
+
     public Long getSpmsTypeId() {
         return spmsTypeId;
     }
+
+    public void setSpmsTypeId(Long spmsTypeId) {
+        this.spmsTypeId = spmsTypeId;
+    }
+
 
     public String getSpmsTypeName() {
         return spmsTypeName;
     }
 
+    public void setSpmsTypeName(String spmsTypeName) {
+        this.spmsTypeName = spmsTypeName;
+    }
+
+
     public Long getRequestingOfficeId() {
         return requestingOfficeId;
     }
+
+    public void setRequestingOfficeId(Long requestingOfficeId) {
+        this.requestingOfficeId = requestingOfficeId;
+    }
+
 
     public String getRequestingOfficeName() {
         return requestingOfficeName;
     }
 
+    public void setRequestingOfficeName(String requestingOfficeName) {
+        this.requestingOfficeName = requestingOfficeName;
+    }
+
+
+    public Long getDocumentTypeId() {
+        return documentTypeId;
+    }
+
+    public void setDocumentTypeId(Long documentTypeId) {
+        this.documentTypeId = documentTypeId;
+    }
+
+
     public String getDocumentTypeName() {
         return documentTypeName;
     }
+
+    public void setDocumentTypeName(String documentTypeName) {
+        this.documentTypeName = documentTypeName;
+    }
+
 
     public Long getDocumentFormatId() {
         return documentFormatId;
     }
 
+    public void setDocumentFormatId(Long documentFormatId) {
+        this.documentFormatId = documentFormatId;
+    }
+
+
     public String getDocumentFormatName() {
         return documentFormatName;
     }
+
+    public void setDocumentFormatName(String documentFormatName) {
+        this.documentFormatName = documentFormatName;
+    }
+
 
     public String getContactDetails() {
         return contactDetails;
     }
 
+    public void setContactDetails(String contactDetails) {
+        this.contactDetails = contactDetails;
+    }
+
+
     public String getCurrentStage() {
         return currentStage;
     }
+
+    public void setCurrentStage(String currentStage) {
+        this.currentStage = currentStage;
+    }
+
 
     public Long getCreatedById() {
         return createdById;
     }
 
+    public void setCreatedById(Long createdById) {
+        this.createdById = createdById;
+    }
+
+
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
 
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+
     public LocalDateTime getUpdatedAt() {
         return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
     }
 }
