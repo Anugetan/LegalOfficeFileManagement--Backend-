@@ -2,6 +2,7 @@ package com.anuge.legaloffice.entity;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -23,18 +24,19 @@ public class LegalFile {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+
     // =====================================================
     // BASIC INFORMATION
     // =====================================================
 
-    @Column(name = "case_no", nullable = false, unique = true, length = 50)
+    @Column( name = "case_no",nullable = false, unique = true, length = 50)
     private String caseNo;
 
     @Column(name = "date_received", nullable = false)
-    private String dateReceived;
+    private LocalDate dateReceived;
 
-    @Column(name = "time_received")
-    private String timeReceived;
+    @Column( name = "time_received")
+    private LocalTime timeReceived;
 
     @Column(name = "date_completed")
     private LocalDate dateCompleted;
@@ -89,10 +91,17 @@ public class LegalFile {
     // OTHER INFORMATION
     // =====================================================
 
-    @Column(name = "contact_details", columnDefinition = "TEXT")
+    @Column(
+        name = "contact_details",
+        columnDefinition = "TEXT"
+    )
     private String contactDetails;
 
-    @Column(name = "current_stage", length = 50)
+
+    @Column(
+        name = "current_stage",
+        length = 50
+    )
     private String currentStage = "RECEIVED";
 
 
@@ -109,11 +118,27 @@ public class LegalFile {
     // TIMESTAMPS
     // =====================================================
 
-    @Column(name = "created_at", nullable = false, updatable = false)
+    @Column(
+        name = "created_at",
+        nullable = false,
+        updatable = false
+    )
     private LocalDateTime createdAt;
 
-    @Column(name = "updated_at", nullable = false)
+
+    @Column(
+        name = "updated_at",
+        nullable = false
+    )
     private LocalDateTime updatedAt;
+
+
+    // =====================================================
+    // CONSTRUCTOR
+    // =====================================================
+
+    public LegalFile() {
+    }
 
 
     // =====================================================
@@ -125,8 +150,13 @@ public class LegalFile {
 
         LocalDateTime now = LocalDateTime.now();
 
-        createdAt = now;
-        updatedAt = now;
+        if (createdAt == null) {
+            createdAt = now;
+        }
+
+        if (updatedAt == null) {
+            updatedAt = now;
+        }
 
         if (currentStage == null || currentStage.isBlank()) {
             currentStage = "RECEIVED";
@@ -146,138 +176,208 @@ public class LegalFile {
 
 
     // =====================================================
-    // GETTERS AND SETTERS
+    // GET ID
     // =====================================================
 
     public Long getId() {
         return id;
     }
 
+
     public void setId(Long id) {
         this.id = id;
     }
 
 
+    // =====================================================
+    // CASE NUMBER
+    // =====================================================
+
     public String getCaseNo() {
         return caseNo;
     }
+
 
     public void setCaseNo(String caseNo) {
         this.caseNo = caseNo;
     }
 
 
-    public String getDateReceived() {
+    // =====================================================
+    // DATE RECEIVED
+    // =====================================================
+
+    public LocalDate getDateReceived() {
         return dateReceived;
     }
 
-    public void setDateReceived(String dateReceived) {
+
+    public void setDateReceived(LocalDate dateReceived) {
         this.dateReceived = dateReceived;
     }
 
 
-    public String getTimeReceived() {
+    // =====================================================
+    // TIME RECEIVED
+    // =====================================================
+
+    public LocalTime getTimeReceived() {
         return timeReceived;
     }
 
-    public void setTimeReceived(String timeReceived) {
+    public void setTimeReceived(LocalTime timeReceived) {
         this.timeReceived = timeReceived;
     }
 
 
+    // =====================================================
+    // DATE COMPLETED
+    // =====================================================
+
     public LocalDate getDateCompleted() {
         return dateCompleted;
     }
+
 
     public void setDateCompleted(LocalDate dateCompleted) {
         this.dateCompleted = dateCompleted;
     }
 
 
+    // =====================================================
+    // STATUS
+    // =====================================================
+
     public Status getStatus() {
         return status;
     }
+
 
     public void setStatus(Status status) {
         this.status = status;
     }
 
 
+    // =====================================================
+    // SPMS TYPE
+    // =====================================================
+
     public SpmsType getSpmsType() {
         return spmsType;
     }
+
 
     public void setSpmsType(SpmsType spmsType) {
         this.spmsType = spmsType;
     }
 
 
+    // =====================================================
+    // REQUESTING OFFICE
+    // =====================================================
+
     public Office getRequestingOffice() {
         return requestingOffice;
     }
+
 
     public void setRequestingOffice(Office requestingOffice) {
         this.requestingOffice = requestingOffice;
     }
 
 
+    // =====================================================
+    // DOCUMENT TYPE
+    // =====================================================
+
     public DocumentType getDocumentType() {
         return documentType;
     }
+
 
     public void setDocumentType(DocumentType documentType) {
         this.documentType = documentType;
     }
 
 
+    // =====================================================
+    // DOCUMENT FORMAT
+    // =====================================================
+
     public DocumentFormat getDocumentFormat() {
         return documentFormat;
     }
+
 
     public void setDocumentFormat(DocumentFormat documentFormat) {
         this.documentFormat = documentFormat;
     }
 
 
+    // =====================================================
+    // CONTACT DETAILS
+    // =====================================================
+
     public String getContactDetails() {
         return contactDetails;
     }
+
 
     public void setContactDetails(String contactDetails) {
         this.contactDetails = contactDetails;
     }
 
 
+    // =====================================================
+    // CURRENT STAGE
+    // =====================================================
+
     public String getCurrentStage() {
         return currentStage;
     }
+
 
     public void setCurrentStage(String currentStage) {
         this.currentStage = currentStage;
     }
 
 
+    // =====================================================
+    // CREATED BY
+    // =====================================================
+
     public Users getCreatedBy() {
         return createdBy;
     }
+
 
     public void setCreatedBy(Users createdBy) {
         this.createdBy = createdBy;
     }
 
 
+    // =====================================================
+    // CREATED AT
+    // =====================================================
+
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
+
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }
 
 
+    // =====================================================
+    // UPDATED AT
+    // =====================================================
+
     public LocalDateTime getUpdatedAt() {
         return updatedAt;
     }
+
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
