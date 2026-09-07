@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.*;
 
 import com.anuge.legaloffice.dto.LegalFileRequest;
 import com.anuge.legaloffice.dto.LegalFileResponse;
-import com.anuge.legaloffice.dto.StatusUpdateRequest;
 import com.anuge.legaloffice.entity.LegalFile;
 import com.anuge.legaloffice.service.LegalFileService;
 
@@ -17,6 +16,9 @@ public class LegalFileController {
 
     private final LegalFileService legalFileService;
 
+    // =========================================================
+    // CONSTRUCTOR
+    // =========================================================
 
     public LegalFileController(
             LegalFileService legalFileService) {
@@ -24,10 +26,9 @@ public class LegalFileController {
         this.legalFileService = legalFileService;
     }
 
-
-    // =========================================
+    // =========================================================
     // GET ALL LEGAL FILES
-    // =========================================
+    // =========================================================
 
     @GetMapping
     public ResponseEntity<List<LegalFileResponse>>
@@ -43,10 +44,9 @@ public class LegalFileController {
         return ResponseEntity.ok(response);
     }
 
-
-    // =========================================
+    // =========================================================
     // GET LEGAL FILE BY ID
-    // =========================================
+    // =========================================================
 
     @GetMapping("/{id}")
     public ResponseEntity<LegalFileResponse>
@@ -54,17 +54,17 @@ public class LegalFileController {
                     @PathVariable Long id) {
 
         LegalFile legalFile =
-                legalFileService.getLegalFileById(id);
+                legalFileService
+                        .getLegalFileById(id);
 
         return ResponseEntity.ok(
-            new LegalFileResponse(legalFile)
+                new LegalFileResponse(legalFile)
         );
     }
 
-
-    // =========================================
+    // =========================================================
     // GET LEGAL FILE BY CASE NUMBER
-    // =========================================
+    // =========================================================
 
     @GetMapping("/case/{caseNo}")
     public ResponseEntity<LegalFileResponse>
@@ -73,17 +73,16 @@ public class LegalFileController {
 
         LegalFile legalFile =
                 legalFileService
-                    .getLegalFileByCaseNo(caseNo);
+                        .getLegalFileByCaseNo(caseNo);
 
         return ResponseEntity.ok(
-            new LegalFileResponse(legalFile)
+                new LegalFileResponse(legalFile)
         );
     }
 
-
-    // =========================================
+    // =========================================================
     // CREATE LEGAL FILE
-    // =========================================
+    // =========================================================
 
     @PostMapping
     public ResponseEntity<LegalFileResponse>
@@ -92,17 +91,16 @@ public class LegalFileController {
 
         LegalFile legalFile =
                 legalFileService
-                    .createLegalFile(request);
+                        .createLegalFile(request);
 
         return ResponseEntity.ok(
-            new LegalFileResponse(legalFile)
+                new LegalFileResponse(legalFile)
         );
     }
 
-
-    // =========================================
-    // UPDATE COMPLETE LEGAL FILE
-    // =========================================
+    // =========================================================
+    // UPDATE LEGAL FILE INFORMATION
+    // =========================================================
 
     @PutMapping("/{id}")
     public ResponseEntity<LegalFileResponse>
@@ -112,39 +110,19 @@ public class LegalFileController {
 
         LegalFile legalFile =
                 legalFileService
-                    .updateLegalFile(id, request);
+                        .updateLegalFile(
+                                id,
+                                request
+                        );
 
         return ResponseEntity.ok(
-            new LegalFileResponse(legalFile)
+                new LegalFileResponse(legalFile)
         );
     }
 
-
-    // =========================================
-    // UPDATE STATUS ONLY
-    // =========================================
-
-    @PutMapping("/{id}/status")
-    public ResponseEntity<LegalFileResponse>
-            updateStatus(
-                    @PathVariable Long id,
-                    @RequestBody StatusUpdateRequest request) {
-
-        LegalFile legalFile =
-                legalFileService.updateStatus(
-                    id,
-                    request.getStatusId()
-                );
-
-        return ResponseEntity.ok(
-            new LegalFileResponse(legalFile)
-        );
-    }
-
-
-    // =========================================
+    // =========================================================
     // DELETE LEGAL FILE
-    // =========================================
+    // =========================================================
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void>
@@ -153,6 +131,8 @@ public class LegalFileController {
 
         legalFileService.deleteLegalFile(id);
 
-        return ResponseEntity.noContent().build();
+        return ResponseEntity
+                .noContent()
+                .build();
     }
 }
