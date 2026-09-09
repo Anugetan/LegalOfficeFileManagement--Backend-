@@ -83,11 +83,16 @@ public class SecurityConfig {
 
             .authorizeHttpRequests(auth -> auth
 
-                .requestMatchers("/api/auth/login").permitAll()
-                .requestMatchers("/api/auth/register").permitAll()
+            	    // Public authentication endpoints
+            	    .requestMatchers("/api/auth/login").permitAll()
+            	    .requestMatchers("/api/auth/register").permitAll()
 
-                .anyRequest().authenticated()
-            )
+            	    // Admin endpoints - ADMIN role only
+            	    .requestMatchers("/api/admin/**").hasRole("ADMIN")
+
+            	    // Everything else requires authentication
+            	    .anyRequest().authenticated()
+            	)
 
             .addFilterBefore(
                 jwtAuthenticationFilter,
