@@ -1,73 +1,93 @@
-# Legal Office Management System - Backend
+Legal Office Management System - Backend
 
-Backend REST API for the **Legal Office Management System**.
+Backend REST API for the Legal Office Management System.
 
 The backend is responsible for user authentication, JWT security, registration approval, legal file management, file workflow, proof of service, and communication with the PostgreSQL database.
 
----
-
-## 🚀 Project Overview
+🚀 Project Overview
 
 The Legal Office Management System is designed to help legal offices manage and track legal files throughout their processing workflow.
 
 The backend provides REST APIs for:
 
-- User registration
-- User login
-- JWT authentication
-- Role-based authorization
-- Administrator user approval
-- User rejection
-- Legal file management
-- Legal file tracking
-- Proof of Service
-- Document information
-- File status management
-- File workflow management
-- PostgreSQL database access
+User registration
 
----
+User login
 
-## 🛠️ Technologies Used
+JWT authentication
 
-### Backend
+Role-based authorization
 
-- Java
-- Spring Boot
-- Spring Security
-- Spring Data JPA
-- Hibernate
-- JWT
-- REST API
-- Maven
+Administrator user approval
 
-### Database
+User rejection
 
-- PostgreSQL
+Legal file management
 
-### Security
+Legal file tracking
 
-- Spring Security
-- JWT Authentication
-- BCrypt Password Hashing
-- Role-Based Access Control
-- Stateless Authentication
+Proof of Service
 
-### Development Tools
+Document information
 
-- Eclipse
-- Visual Studio Code
-- Postman
-- Git
-- GitHub
+File status management
 
----
+File workflow management
 
-## 🏗️ Application Architecture
+PostgreSQL database access
+
+🛠️ Technologies Used
+
+Backend
+
+Java
+
+Spring Boot
+
+Spring Security
+
+Spring Data JPA
+
+Hibernate
+
+JWT
+
+REST API
+
+Maven
+
+Database
+
+PostgreSQL
+
+Security
+
+Spring Security
+
+JWT Authentication
+
+BCrypt Password Hashing
+
+Role-Based Access Control
+
+Stateless Authentication
+
+Development Tools
+
+Eclipse
+
+Visual Studio Code
+
+Postman
+
+Git
+
+GitHub
+
+🏗️ Application Architecture
 
 The backend follows a layered architecture.
 
-```text
 Angular Frontend
        |
        | HTTP / REST API
@@ -132,7 +152,9 @@ Protected API Requests
 
 The JWT token is sent with protected requests using:
 
+```http
 Authorization: Bearer <JWT_TOKEN>
+
 🔑 JWT Security
 
 JWT is used to authenticate users without maintaining server-side sessions.
@@ -156,20 +178,20 @@ New users cannot immediately access the system.
 The registration workflow is:
 
 Registration
-      |
-      v
-   PENDING
-      |
-      v
+|
+v
+PENDING
+|
+v
 Administrator Review
-      |
-      +----------------+
-      |                |
-      v                v
-  APPROVED         REJECTED
-      |                |
-      v                v
-  Can Login        Login Blocked
+|
++----------------+
+|                |
+v                v
+APPROVED         REJECTED
+|                |
+v                v
+Can Login        Login Blocked
 
 When a user registers:
 
@@ -212,6 +234,7 @@ Only users with the ADMIN role can access these endpoints.
 The system currently supports:
 
 ADMIN
+
 USER
 
 Administrative endpoints are protected by Spring Security.
@@ -245,18 +268,31 @@ The Legal Files module manages legal files and their processing information.
 Legal files contain information such as:
 
 Case Number
+
 Date Received
+
 Time Received
+
 Date Completed
+
 Status
+
 SPMS Type
+
 Requesting Office
+
 Document Type
+
 Document Format
+
 Contact Details
+
 Current Stage
+
 Created By
+
 Created Date
+
 Updated Date
 📋 Legal File Workflow
 
@@ -265,17 +301,17 @@ Legal files can move through different processing stages.
 Example workflow:
 
 RECEIVED
-    |
-    v
+|
+v
 INITIAL REVIEW
-    |
-    v
+|
+v
 PROCESSING
-    |
-    v
+|
+v
 FINAL REVIEW
-    |
-    v
+|
+v
 COMPLETED
 
 The backend stores the current stage and status of each legal file.
@@ -293,18 +329,31 @@ The application uses PostgreSQL.
 Main database entities include:
 
 users
+
 statuses
+
 spms_types
+
 offices
+
 document_types
+
 logbook_types
+
 document_formats
+
 legal_files
+
 file_actions
+
 file_documents
+
 initial_reviews
+
 file_reviews
+
 final_documents
+
 proof_of_service
 
 The legal_files table acts as the central entity for legal file information.
@@ -316,13 +365,21 @@ The users table contains authentication and account information.
 Important fields include:
 
 id
+
 username
+
 full_name
+
 email
+
 password_hash
+
 role
+
 active
+
 registration_status
+
 created_at
 
 Registration status values:
@@ -339,49 +396,49 @@ The backend follows a layered Spring Boot structure.
 
 src/
 └── main/
-    ├── java/
-    │   └── com/
-    │       └── anuge/
-    │           └── legaloffice/
-    │               │
-    │               ├── config/
-    │               │   └── SecurityConfig.java
-    │               │
-    │               ├── controller/
-    │               │   ├── AuthController.java
-    │               │   ├── AdminController.java
-    │               │   └── ...
-    │               │
-    │               ├── dto/
-    │               │   ├── AuthResponse.java
-    │               │   ├── LoginRequest.java
-    │               │   └── RegisterRequest.java
-    │               │
-    │               ├── entity/
-    │               │   ├── Users.java
-    │               │   ├── LegalFile.java
-    │               │   └── ...
-    │               │
-    │               ├── enums/
-    │               │   └── RegistrationStatus.java
-    │               │
-    │               ├── repository/
-    │               │   ├── UserRepository.java
-    │               │   ├── LegalFileRepository.java
-    │               │   └── ...
-    │               │
-    │               ├── security/
-    │               │   ├── CustomUserDetailsService.java
-    │               │   ├── JwtAuthenticationFilter.java
-    │               │   └── JwtService.java
-    │               │
-    │               └── service/
-    │                   ├── AuthService.java
-    │                   ├── AdminUserService.java
-    │                   └── ...
-    │
-    └── resources/
-        └── application.properties
+├── java/
+│   └── com/
+│       └── anuge/
+│           └── legaloffice/
+│               │
+│               ├── config/
+│               │   └── SecurityConfig.java
+│               │
+│               ├── controller/
+│               │   ├── AuthController.java
+│               │   ├── AdminController.java
+│               │   └── ...
+│               │
+│               ├── dto/
+│               │   ├── AuthResponse.java
+│               │   ├── LoginRequest.java
+│               │   └── RegisterRequest.java
+│               │
+│               ├── entity/
+│               │   ├── Users.java
+│               │   ├── LegalFile.java
+│               │   └── ...
+│               │
+│               ├── enums/
+│               │   └── RegistrationStatus.java
+│               │
+│               ├── repository/
+│               │   ├── UserRepository.java
+│               │   ├── LegalFileRepository.java
+│               │   └── ...
+│               │
+│               ├── security/
+│               │   ├── CustomUserDetailsService.java
+│               │   ├── JwtAuthenticationFilter.java
+│               │   └── JwtService.java
+│               │
+│               └── service/
+│                   ├── AuthService.java
+│                   ├── AdminUserService.java
+│                   └── ...
+│
+└── resources/
+└── application.properties
 🎯 Main Backend Classes
 AuthController
 
@@ -389,6 +446,7 @@ Handles authentication endpoints.
 
 POST /api/auth/register
 POST /api/auth/login
+
 AuthService
 
 Responsible for:
@@ -422,8 +480,11 @@ Loads user information from PostgreSQL for Spring Security.
 It provides:
 
 Username
+
 Password hash
+
 Role
+
 Account status
 JwtAuthenticationFilter
 
@@ -450,8 +511,11 @@ Provides database operations for users.
 Examples:
 
 findByUsername()
+
 existsByUsername()
+
 existsByEmail()
+
 findByRegistrationStatus()
 🔌 API Endpoints
 Authentication
@@ -502,17 +566,22 @@ YOUR_VERCEL_DOMAIN
 CORS configuration should be updated when deploying the frontend.
 
 ▶️ Running the Backend Locally
-1. Clone the repository
+
+Clone the repository
 git clone YOUR_GITHUB_REPOSITORY_URL
+
+
 2. Navigate to the backend project
 cd LegalOfficeBackend
-3. Build the project
+
+Build the project
 
 Using Maven:
 
 mvn clean install
 4. Run the application
-mvn spring-boot:run
+mvn spring-boot
+
 
 The backend will normally run on:
 
