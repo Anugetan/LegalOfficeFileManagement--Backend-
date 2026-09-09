@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 
+import com.anuge.legaloffice.enumerate.RegistrationStatus;
+
 @Entity
 @Table(name = "users")
 public class Users {
@@ -30,6 +32,10 @@ public class Users {
     @Column(name = "active", nullable = false)
     private Boolean active;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "registration_status", nullable = false)
+    private RegistrationStatus registrationStatus;
+
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
@@ -51,6 +57,10 @@ public class Users {
 
         if (active == null) {
             active = true;
+        }
+
+        if (registrationStatus == null) {
+            registrationStatus = RegistrationStatus.PENDING;
         }
     }
 
@@ -115,6 +125,15 @@ public class Users {
 
     public void setActive(Boolean active) {
         this.active = active;
+    }
+
+
+    public RegistrationStatus getRegistrationStatus() {
+        return registrationStatus;
+    }
+
+    public void setRegistrationStatus(RegistrationStatus registrationStatus) {
+        this.registrationStatus = registrationStatus;
     }
 
 
